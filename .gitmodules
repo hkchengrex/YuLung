@@ -1,0 +1,3 @@
+[submodule "pysc2"]
+	path = pysc2
+	url = git@github.com:silver-rush/pysc2.git
