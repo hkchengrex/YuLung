@@ -2,7 +2,8 @@ from pysc2.lib.units import Neutral
 from pysc2.lib import raw_units as ru
 from pysc2.env.sc2_env import SC2Env
 
-from .game_module import GameModule
+from .hypervisor import Hypervisor
+from .low_level_module import LowLevelModule
 from bot.util.game_logger import GameLogger
 
 """
@@ -16,14 +17,14 @@ resources_id = [Neutral.MineralField, Neutral.MineralField750,
                 Neutral.VespeneGeyser, Neutral.RichVespeneGeyser]
 
 
-class ExpansionManager(GameModule):
+class ExpansionManager(LowLevelModule):
     """
     ExpansionManager
     - records expansions in the map
     - Miners control
     """
-    def __init__(self, sc2_env: SC2Env, logger: GameLogger):
-        super(ExpansionManager, self).__init__(sc2_env, logger)
+    def __init__(self, hypervisor: Hypervisor):
+        super(ExpansionManager, self).__init__(hypervisor)
 
         self.expansion_locations = None
 
