@@ -24,6 +24,8 @@ from pysc2.lib import static_data
 from s2clientprotocol import common_pb2 as sc_common
 from s2clientprotocol import sc2api_pb2 as sc_pb
 
+from .unit import Attribute, Weapon, UnitType
+
 
 def get_data():
     """Get the game's static data from an actual game."""
@@ -48,7 +50,7 @@ def gen_header(class_name):
     print('# Auto-generated.')
     print('import enum')
     print()
-    print('class %s(enum.Enum):' % class_name)
+    print('class %s(enum.IntEnum):' % class_name)
     print()
 
 
@@ -67,19 +69,16 @@ def generate_py_units(data):
             # print([i for i in (list(unit.weapons))])
 
     print()
-    print('from unit import Unit')
-    print('UNITS = [None] * %d' % len(units))
+    print()
+    print('from .unit import Attribute, Weapon, UnitType')
+    print('UNITS = dict()')
+    print()
     for i, unit in enumerate(units):
-        print('UNITS[UnitID.%s] = '
-              'Unit(unit_id=%d, name=%s,cargo_size=%d, '
-              'mineral_cost=%d, vespene_cost=%d)'
-              % (unit.name, unit.unit_id, unit.name, unit.cargo_size,
-                 unit.mineral_cost, unit.vespene_cost))
+        print('UNITS[UnitID.%s] = %s' % (unit.name, UnitType.from_proto(unit).gen_py()))
 
 
 def main(unused_argv):
     data = get_data()
-    print("-" * 60)
 
     generate_py_units(data)
 

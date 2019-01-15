@@ -7,3 +7,7 @@ exposes the raw interface.
 Running the test bot: 
 
 `python -m pysc2.bin.agent --map CollectMineralShards --agent src.sample_agent.CollectMineralShards`
+
+To generate static unit information (Might need manual clean up for pygame output):
+
+`python -m bot.util.gen_units_data | tee bot/util/static_units.py`
