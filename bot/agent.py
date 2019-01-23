@@ -15,12 +15,14 @@ class YuLungAgent(base_agent.BaseAgent):
     def reset(self):
         super(YuLungAgent, self).reset()
 
-        self.logger = GameLogger(self.sc2_env)
-        self.hypervisor = Hypervisor(self.sc2_env, self.logger)
+        self.hypervisor = Hypervisor(self.sc2_env)
 
     def step(self, obs):
         super(YuLungAgent, self).step(obs)
 
-        self.hypervisor.process(obs)
+        action = self.hypervisor.process(obs)
+
+        if action is not None:
+            return action
 
         return FUNCTIONS.no_op()

@@ -1,14 +1,14 @@
-from .hypervisor import Hypervisor
+from .global_info import GlobalInfo
 
 
 class LowLevelModule:
-    def __init__(self, hypervisor: Hypervisor):
-        self.hypervisor = hypervisor
+    def __init__(self, global_info: GlobalInfo):
+        self.global_info = global_info
 
     @property
     def sc2_env(self):
-        return self.hypervisor.sc2_env
+        return self.global_info.sc2_env
 
     @property
     def logger(self):
-        return self.hypervisor.logger
+        return self.global_info

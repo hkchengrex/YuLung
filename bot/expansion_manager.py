@@ -2,9 +2,7 @@ from pysc2.lib.units import Neutral
 from pysc2.lib import raw_units as ru
 from pysc2.env.sc2_env import SC2Env
 
-from .hypervisor import Hypervisor
 from .low_level_module import LowLevelModule
-from bot.util.game_logger import GameLogger
 
 """
 Constants
@@ -23,7 +21,7 @@ class ExpansionManager(LowLevelModule):
     - records expansions in the map
     - Miners control
     """
-    def __init__(self, hypervisor: Hypervisor):
+    def __init__(self, hypervisor):
         super(ExpansionManager, self).__init__(hypervisor)
 
         self.expansion_locations = None
