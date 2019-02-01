@@ -4,10 +4,47 @@ from .low_level_module import LowLevelModule
 
 from .util.static_units import UNITS, UnitID
 from .util.unit import Attribute, Weapon, UnitType
+from .util import unit
+from .queries import *
+
+from s2clientprotocol import (
+    error_pb2 as error_pb,
+)
 
 from pysc2.lib import actions
+from pysc2.lib import point
 FUNCTIONS = actions.FUNCTIONS
 
+FROM_LARVA = [
+    UNITS[UnitID.Drone],
+    UNITS[UnitID.Zergling],
+    UNITS[UnitID.Hydralisk],
+    UNITS[UnitID.Roach],
+    UNITS[UnitID.Infestor],
+    UNITS[UnitID.SwarmHostMP],
+    UNITS[UnitID.Ultralisk],
+    UNITS[UnitID.Overlord],
+    UNITS[UnitID.Mutalisk],
+    UNITS[UnitID.Corruptor],
+    UNITS[UnitID.Viper],
+]
+
+FROM_DRONE = [
+    UNITS[UnitID.Hatchery],
+    UNITS[UnitID.Extractor],
+    UNITS[UnitID.SpawningPool],
+    UNITS[UnitID.EvolutionChamber],
+    UNITS[UnitID.SpineCrawler],
+    UNITS[UnitID.SporeCrawler],
+    UNITS[UnitID.RoachWarren],
+    UNITS[UnitID.BanelingNest],
+    UNITS[UnitID.HydraliskDen],
+    UNITS[UnitID.LurkerDenMP],
+    UNITS[UnitID.InfestationPit],
+    UNITS[UnitID.Spire],
+    UNITS[UnitID.NydusNetwork],
+    UNITS[UnitID.UltraliskCavern],
+]
 
 class ProductionManager(LowLevelModule):
     """
@@ -15,13 +52,10 @@ class ProductionManager(LowLevelModule):
     - Maintain queue of units/buildings production
     - Pick workers/lavras to build stuff
     """
-    def __init__(self, hypervisor):
-        super(ProductionManager, self).__init__(hypervisor)
+    def __init__(self, global_info):
+        super(ProductionManager, self).__init__(global_info)
 
         self.units_pending = []
-        self.buildings_pending = []
-
-        self.build_asap(UNITS[UnitID.Drone])
 
     def build_asap(self, unit_type: UnitType, amount=1):
         self.units_pending.extend([unit_type] * amount)
@@ -30,11 +64,33 @@ class ProductionManager(LowLevelModule):
         for unit_type in self.units_pending:
             if self.global_info.can_afford_unit(unit_type):
 
-                larvas = [larva for larva in units if larva.unit_type == UNITS[UnitID.Larva].unit_id]
-                if len(larvas) > 0:
-                    self.logger.log_game_info("Planning to build unit of type: " + unit_type.name)
-                    selected_larva = random.choice(larvas)
-                    return list(actions.ABILITY_IDS[unit_type.ability_id])[0]("now", selected_larva.tag)
+                if unit_type in FROM_LARVA:
+                    # Pick a larva and build the unit required
+                    larvas = unit.get_all(units, UNITS[UnitID.Larva])
+                    if len(larvas) > 0:
+                        self.logger.log_game_info("Planning to build unit of type: " + unit_type.name)
+                        self.units_pending = self.units_pending[1:]
+                        selected_larva = random.choice(larvas)
+                        return list(actions.ABILITY_IDS[unit_type.ability_id])[0]("now", selected_larva.tag)
+
+                elif unit_type in FROM_DRONE:
+                    # Pick a drone and build it in a proper place
+                    drones = unit.get_all(units, UNITS[UnitID.Drone])
+                    if len(drones) > 0:
+                        # Pick drone
+                        selected_drone = random.choice(drones)
+
+                        # Pick location
+                        ran_x = random.randint(0, 6000)
+                        ran_y = random.randint(0, 6000)
+                        p = point.Point(ran_x, ran_y)
+                        result = query_building_placement(self.sc2_env, unit_type.ability_id, p)
+
+                        # 1=Success, see https://github.com/Blizzard/s2client-proto/blob/master/s2clientprotocol/error.proto
+                        if result == 1:
+                            self.logger.log_game_info("Planning to build unit of type: " + unit_type.name)
+                            self.units_pending = self.units_pending[1:]
+                            return list(actions.ABILITY_IDS[unit_type.ability_id])[0]("now", p, selected_drone.tag)
 
         return None
 

@@ -21,8 +21,8 @@ class ExpansionManager(LowLevelModule):
     - records expansions in the map
     - Miners control
     """
-    def __init__(self, hypervisor):
-        super(ExpansionManager, self).__init__(hypervisor)
+    def __init__(self, global_info):
+        super(ExpansionManager, self).__init__(global_info)
 
         self.expansion_locations = None
 

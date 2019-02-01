@@ -135,3 +135,7 @@ class UnitType:
                  str(self.require_attached), attributes,
                  self.movement_speed, self.armor, weapons))
 
+
+def get_all(units, unit_type):
+    return [u for u in units if u.unit_type == unit_type.unit_id]
+
