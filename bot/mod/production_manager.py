@@ -2,10 +2,11 @@ import random
 
 from .low_level_module import LowLevelModule
 
-from .util.static_units import UNITS, UnitID
-from .util.unit import Attribute, Weapon, UnitType
-from .util import unit
-from .queries import *
+from bot.util.static_units import UNITS, UnitID
+from bot.util.unit import Attribute, Weapon, UnitType
+from bot.util.helper import *
+from bot.util import unit
+from bot.queries import *
 
 from s2clientprotocol import (
     error_pb2 as error_pb,
@@ -46,14 +47,6 @@ FROM_DRONE = [
     UNITS[UnitID.UltraliskCavern],
 ]
 
-def get_raw_action_id(abaility_id):
-    fn_list = list(actions.ABILITY_IDS[abaility_id])
-
-    for l in fn_list:
-        if 'raw' in l.name:
-            return l
-
-    return None
 
 class ProductionManager(LowLevelModule):
     """

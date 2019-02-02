@@ -1,4 +1,4 @@
-from .global_info import GlobalInfo
+from bot.mod.global_info import GlobalInfo
 
 
 class LowLevelModule:

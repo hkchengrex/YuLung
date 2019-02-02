@@ -1,15 +1,13 @@
 from pysc2.lib import raw_units as ru
 from pysc2.env.sc2_env import SC2Env
 
-from bot.util.game_logger import GameLogger
-
-from .global_info import GlobalInfo
+from bot.mod.global_info import GlobalInfo
 from .util.static_units import UNITS, UnitID
 from .util import unit
 
-from .expansion_manager import ExpansionManager
-from .production_manager import ProductionManager
-
+from bot.mod.expansion_manager import ExpansionManager
+from bot.mod.production_manager import ProductionManager
+from bot.mod.comabt_manager import CombatManager
 
 class Hypervisor:
     """
@@ -22,8 +20,11 @@ class Hypervisor:
 
         self.expan_man = ExpansionManager(self.global_info)
         self.produ_man = ProductionManager(self.global_info)
+        self.comba_man = CombatManager(self.global_info)
 
         self.global_info.log_game_info("Hypervisor initialized.")
+
+        self.produ_man.build_asap(UNITS[UnitID.Overlord])
 
     def process(self, obs):
         units = [ru.RawUnit(u) for u in obs.observation.raw_units]
@@ -50,6 +51,10 @@ class Hypervisor:
         """
 
         # Define priorities here. TODO: Might need to give priorities dynamically
+        action = self.comba_man.update(units)
+        if action is not None:
+            return action
+
         action = self.produ_man.update(units)
         if action is not None:
             return action
