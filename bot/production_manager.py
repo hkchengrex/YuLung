@@ -46,6 +46,15 @@ FROM_DRONE = [
     UNITS[UnitID.UltraliskCavern],
 ]
 
+def get_raw_action_id(abaility_id):
+    fn_list = list(actions.ABILITY_IDS[abaility_id])
+
+    for l in fn_list:
+        if 'raw' in l.name:
+            return l
+
+    return None
+
 class ProductionManager(LowLevelModule):
     """
     ProductionManager
@@ -68,10 +77,15 @@ class ProductionManager(LowLevelModule):
                     # Pick a larva and build the unit required
                     larvas = unit.get_all(units, UNITS[UnitID.Larva])
                     if len(larvas) > 0:
-                        self.logger.log_game_info("Planning to build unit of type: " + unit_type.name)
-                        self.units_pending = self.units_pending[1:]
                         selected_larva = random.choice(larvas)
-                        return list(actions.ABILITY_IDS[unit_type.ability_id])[0]("now", selected_larva.tag)
+
+                        avail_abilities = query_available_abilities(self.sc2_env, selected_larva.tag)
+                        if unit_type.ability_id in avail_abilities:
+                            self.logger.log_game_info("Planning to build unit of type: " + unit_type.name)
+                            self.units_pending = self.units_pending[1:]
+                            return get_raw_action_id(unit_type.ability_id)("now", selected_larva.tag)
+                        else:
+                            self.logger.log_game_info("Tried to morph: " + unit_type.name + " but we cannot.")
 
                 elif unit_type in FROM_DRONE:
                     # Pick a drone and build it in a proper place
@@ -90,7 +104,7 @@ class ProductionManager(LowLevelModule):
                         if result == 1:
                             self.logger.log_game_info("Planning to build unit of type: " + unit_type.name)
                             self.units_pending = self.units_pending[1:]
-                            return list(actions.ABILITY_IDS[unit_type.ability_id])[0]("now", p, selected_drone.tag)
+                            return get_raw_action_id(unit_type.ability_id)("now", p, selected_drone.tag)
 
         return None
 

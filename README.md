@@ -4,6 +4,10 @@ YuLung (雨龍) - A Zerg StarCraft II agent.
 Depends on a modded version of pysc2 (https://github.com/silver-rush/pysc2) that
 exposes the raw interface.
 
+Running the actual bot:
+
+`python -m pysc2.bin.agent --map Simple64 --agent bot.agent.YuLungAgent --agent_race zerg`
+
 Running the test bot: 
 
 `python -m pysc2.bin.agent --map CollectMineralShards --agent bot.sample_agent.CollectMineralShards`

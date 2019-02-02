@@ -24,3 +24,13 @@ def query_building_placement(sc2_env, ability_id, target_pos):
             )]
         )
     ])[0].placements[0].result
+
+
+def query_available_abilities(sc2_env, unit_tag):
+    return [a.ability_id for a in sc2_env.request_query([
+        query_pb.RequestQuery(
+            abilities=[query_pb.RequestQueryAvailableAbilities(
+                unit_tag=unit_tag,
+            )]
+        )
+    ])[0].abilities[0].abilities]
