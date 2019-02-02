@@ -33,7 +33,7 @@ class CombatManager(LowLevelModule):
             # print(avail_abilities)
             # if attack_id in avail_abilities:
             self.logger.log_game_info("Planning to attack")
-            return get_raw_action_id(3674)("now", point.Point(6000, 0), u.tag)
+            return get_raw_action_id(3674)("now", point.Point(6500, 1000), u.tag)
 
         else:
             self.queued = unit.get_all(units, UNITS[UnitID.Zergling])
