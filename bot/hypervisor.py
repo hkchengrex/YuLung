@@ -35,17 +35,23 @@ class Hypervisor:
         """
         Hardcoded simple rules here
         """
-        drones = unit.get_all(units, UNITS[UnitID.Drone])
-        pools = unit.get_all(units, UNITS[UnitID.SpawningPool])
+        drones = unit.get_all(units, UNITS[UnitID.Drone]) \
+            + unit.get_all(self.produ_man.all_built, UNITS[UnitID.Drone])
+        pools = unit.get_all(units, UNITS[UnitID.SpawningPool]) \
+            + unit.get_all(self.produ_man.all_built, UNITS[UnitID.SpawningPool])
+
+        # print(self.produ_man.all_built)
 
         if len(self.produ_man.units_pending) == 0:
-            if len(drones) < 12 and len(pools) == 0:
+            if len(drones) < 12:
                 self.produ_man.build_asap(UNITS[UnitID.Drone])
             elif len(pools) == 0:
+                print('Queuing pool')
                 self.produ_man.build_asap(UNITS[UnitID.SpawningPool])
             else:
                 self.produ_man.build_asap(UNITS[UnitID.Zergling])
 
+        self.comba_man.set_attack_tar(self.expan_man.enemy_expansion[0])
         """
         End of hardcoded simple rules
         """
@@ -60,6 +66,4 @@ class Hypervisor:
             return action
 
         return None
-
-
 

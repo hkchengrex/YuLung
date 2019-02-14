@@ -58,9 +58,15 @@ class ProductionManager(LowLevelModule):
         super(ProductionManager, self).__init__(global_info)
 
         self.units_pending = []
+        self.all_built = []
 
     def build_asap(self, unit_type: UnitType, amount=1):
         self.units_pending.extend([unit_type] * amount)
+
+    def record_build(self, type):
+        self.logger.log_game_info("Planning to build: " + type.name)
+        self.units_pending = self.units_pending[1:]
+        self.all_built.append(type)
 
     def update(self, units):
         for unit_type in self.units_pending:
@@ -74,11 +80,10 @@ class ProductionManager(LowLevelModule):
 
                         avail_abilities = query_available_abilities(self.sc2_env, selected_larva.tag)
                         if unit_type.ability_id in avail_abilities:
-                            self.logger.log_game_info("Planning to build unit of type: " + unit_type.name)
-                            self.units_pending = self.units_pending[1:]
+                            self.record_build(unit_type)
                             return get_raw_action_id(unit_type.ability_id)("now", selected_larva.tag)
                         else:
-                            self.logger.log_game_info("Tried to morph: " + unit_type.name + " but we cannot.")
+                            self.logger.log_game_info("Tried to morph: " + unit_type.name + " but we cannot.", False)
 
                 elif unit_type in FROM_DRONE:
                     # Pick a drone and build it in a proper place
@@ -95,8 +100,7 @@ class ProductionManager(LowLevelModule):
 
                         # 1=Success, see https://github.com/Blizzard/s2client-proto/blob/master/s2clientprotocol/error.proto
                         if result == 1:
-                            self.logger.log_game_info("Planning to build unit of type: " + unit_type.name)
-                            self.units_pending = self.units_pending[1:]
+                            self.record_build(unit_type)
                             return get_raw_action_id(unit_type.ability_id)("now", p, selected_drone.tag)
 
         return None

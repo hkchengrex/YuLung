@@ -137,5 +137,14 @@ class UnitType:
 
 
 def get_all(units, unit_type):
-    return [u for u in units if u.unit_type == unit_type.unit_id]
+    if len(units) == 0:
+        return []
 
+    if type(units[0]) == UnitType:
+        return [u for u in units if u.unit_id == unit_type.unit_id]
+    else:
+        return [u for u in units if u.unit_type == unit_type.unit_id]
+
+
+def get_all_owned(units, unit_type):
+    return [u for u in units if u.unit_type == unit_type.unit_id and u.alliance == 1]

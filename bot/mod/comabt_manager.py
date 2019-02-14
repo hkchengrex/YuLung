@@ -20,6 +20,10 @@ class CombatManager(LowLevelModule):
         super(CombatManager, self).__init__(global_info)
 
         self.queued = []
+        self.attack_target = point.Point(0, 0)
+
+    def set_attack_tar(self, target):
+        self.attack_target = target
 
     def update(self, units):
 
@@ -32,8 +36,8 @@ class CombatManager(LowLevelModule):
             # print(attack_id)
             # print(avail_abilities)
             # if attack_id in avail_abilities:
-            self.logger.log_game_info("Planning to attack")
-            return get_raw_action_id(3674)("now", point.Point(6500, 1000), u.tag)
+            self.logger.log_game_info("Planning to attack", False)
+            return get_raw_action_id(3674)("now", self.attack_target, u.tag)
 
         else:
             self.queued = unit.get_all(units, UNITS[UnitID.Zergling])
