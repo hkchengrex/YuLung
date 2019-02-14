@@ -1,5 +1,6 @@
 from pysc2.agents import base_agent
 from pysc2.lib import actions
+import pysc2.lib
 
 from .hypervisor import Hypervisor
 from bot.util.game_logger import GameLogger
@@ -20,7 +21,11 @@ class YuLungAgent(base_agent.BaseAgent):
     def step(self, obs):
         super(YuLungAgent, self).step(obs)
 
-        action = self.hypervisor.process(obs)
+        try:
+            action = self.hypervisor.process(obs)
+        except pysc2.lib.protocol.ProtocolError as e:
+            action = None
+            print('Protocol exception caught in base agent', e)
 
         if action is not None:
             return action
