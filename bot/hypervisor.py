@@ -46,7 +46,6 @@ class Hypervisor:
             if len(drones) < 12:
                 self.produ_man.build_asap(UNITS[UnitID.Drone])
             elif len(pools) == 0:
-                print('Queuing pool')
                 self.produ_man.build_asap(UNITS[UnitID.SpawningPool])
             else:
                 self.produ_man.build_asap(UNITS[UnitID.Zergling])

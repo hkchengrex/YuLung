@@ -27,22 +27,22 @@ class CombatManager(LowLevelModule):
 
     def update(self, units):
 
+        planned_action = None
+
         # Need to command one-by-one now, will add batched command later in pysc2
         if len(self.queued) != 0:
-            u = self.queued.pop(0)
-
-            avail_abilities = query_available_abilities(self.sc2_env, u.tag)
+            # avail_abilities = query_available_abilities(self.sc2_env, u.tag)
             # attack_id = FUNCTIONS.Attack_raw_pos.id
             # print(attack_id)
             # print(avail_abilities)
             # if attack_id in avail_abilities:
-            self.logger.log_game_info("Planning to attack", False)
-            return get_raw_action_id(3674)("now", self.attack_target, u.tag)
-
+            self.logger.log_game_info('Planning to attack', False)
+            planned_action = get_raw_action_id(3674)("now", self.attack_target, [u.tag for u in self.queued])
+            self.queued = []
         else:
             self.queued = unit.get_all(units, UNITS[UnitID.Zergling])
             if len(self.queued) <= 8:
                 self.queued = []
 
-        return None
+        return planned_action
 

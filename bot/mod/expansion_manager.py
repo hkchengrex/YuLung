@@ -88,7 +88,6 @@ class ExpansionManager(LowLevelModule):
                 self.enemy_expansion.append(max_loc)
                 self.logger.log_game_info('Enemy expansion at ' + str(max_loc))
 
-
     def get_expansion_locations(self):
         return self.expansion_locations
 
