@@ -241,7 +241,7 @@ class UnitID(enum.IntEnum):
     ZerglingBurrowed = 235
 
 
-from .unit import Attribute, Weapon, UnitType
+from .unit_info import Attribute, Weapon, UnitType
 
 UNITS = dict()
 

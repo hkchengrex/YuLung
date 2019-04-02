@@ -24,7 +24,7 @@ from pysc2.lib import static_data
 from s2clientprotocol import common_pb2 as sc_common
 from s2clientprotocol import sc2api_pb2 as sc_pb
 
-from .unit import Attribute, Weapon, UnitType
+from .unit_info import Attribute, Weapon, UnitType
 
 
 def get_data():

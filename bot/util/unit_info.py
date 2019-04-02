@@ -3,7 +3,6 @@ from typing import List
 import enum
 from s2clientprotocol import data_pb2 as sc_data
 
-
 class Attribute(enum.IntEnum):
     Light = 1
     Armored = 2

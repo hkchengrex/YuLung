@@ -2,12 +2,15 @@ from pysc2.lib import raw_units as ru
 from pysc2.env.sc2_env import SC2Env
 
 from bot.mod.global_info import GlobalInfo
-from .util.static_units import UNITS, UnitID
-from .util import unit
+from bot.util.static_units import UNITS, UnitID
+from bot.util import unit_info
+
+from bot.struct.unit_class import Unit
 
 from bot.mod.expansion_manager import ExpansionManager
 from bot.mod.production_manager import ProductionManager
 from bot.mod.comabt_manager import CombatManager
+
 
 class Hypervisor:
     """
@@ -27,7 +30,7 @@ class Hypervisor:
         self.produ_man.build_asap(UNITS[UnitID.Overlord])
 
     def process(self, obs):
-        units = [ru.RawUnit(u) for u in obs.observation.raw_units]
+        units = [Unit(u) for u in obs.observation.raw_units]
         self.global_info.update(obs)
 
         self.expan_man.refresh_expansion(units)
@@ -35,10 +38,10 @@ class Hypervisor:
         """
         Hardcoded simple rules here
         """
-        drones = unit.get_all(units, UNITS[UnitID.Drone]) \
-            + unit.get_all(self.produ_man.all_built, UNITS[UnitID.Drone])
-        pools = unit.get_all(units, UNITS[UnitID.SpawningPool]) \
-            + unit.get_all(self.produ_man.all_built, UNITS[UnitID.SpawningPool])
+        drones = unit_info.get_all(units, UNITS[UnitID.Drone]) \
+                 + unit_info.get_all(self.produ_man.all_built, UNITS[UnitID.Drone])
+        pools = unit_info.get_all(units, UNITS[UnitID.SpawningPool]) \
+                + unit_info.get_all(self.produ_man.all_built, UNITS[UnitID.SpawningPool])
 
         # print(self.produ_man.all_built)
 

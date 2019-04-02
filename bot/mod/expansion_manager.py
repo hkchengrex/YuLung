@@ -5,7 +5,7 @@ from pysc2.lib import point
 
 from .low_level_module import LowLevelModule
 
-from bot.util import unit
+from bot.util import unit_info
 from bot.util.static_units import UNITS, UnitID
 
 """
@@ -71,7 +71,7 @@ class ExpansionManager(LowLevelModule):
             self.owned_expansion = []
             self.enemy_expansion = []
 
-            hatcheries = unit.get_all_owned(units, UNITS[UnitID.Hatchery])
+            hatcheries = unit_info.get_all_owned(units, UNITS[UnitID.Hatchery])
             for loc, _ in self.expansion_locations.items():
                 if hatcheries[0].pos.dist(loc) < 1000:
                     self.owned_expansion.append(loc)

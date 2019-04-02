@@ -3,9 +3,9 @@ import random
 from .low_level_module import LowLevelModule
 
 from bot.util.static_units import UNITS, UnitID
-from bot.util.unit import Attribute, Weapon, UnitType
+from bot.util.unit_info import Attribute, Weapon, UnitType
 from bot.util.helper import *
-from bot.util import unit
+from bot.util import unit_info
 from bot.queries import *
 
 from s2clientprotocol import (
@@ -77,7 +77,7 @@ class ProductionManager(LowLevelModule):
 
                 if unit_type in FROM_LARVA:
                     # Pick a larva and build the unit required
-                    larvas = unit.get_all(units, UNITS[UnitID.Larva])
+                    larvas = unit_info.get_all(units, UNITS[UnitID.Larva])
                     if len(larvas) > 0:
                         selected_larva = random.choice(larvas)
 
@@ -91,7 +91,7 @@ class ProductionManager(LowLevelModule):
 
                 elif unit_type in FROM_DRONE:
                     # Pick a drone and build it in a proper place
-                    drones = unit.get_all(units, UNITS[UnitID.Drone])
+                    drones = unit_info.get_all(units, UNITS[UnitID.Drone])
                     if len(drones) > 0:
                         # Pick drone
                         selected_drone = random.choice(drones)

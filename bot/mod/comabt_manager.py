@@ -1,9 +1,9 @@
 from .low_level_module import LowLevelModule
 
 from bot.util.static_units import UNITS, UnitID
-from bot.util.unit import Attribute, Weapon, UnitType
+from bot.util.unit_info import Attribute, Weapon, UnitType
 from bot.util.helper import *
-from bot.util import unit
+from bot.util import unit_info
 from bot.queries import *
 
 from pysc2.lib import actions
@@ -40,7 +40,7 @@ class CombatManager(LowLevelModule):
             planned_action = get_raw_action_id(3674)("now", self.attack_target, [u.tag for u in self.queued])
             self.queued = []
         else:
-            self.queued = unit.get_all(units, UNITS[UnitID.Zergling])
+            self.queued = unit_info.get_all(units, UNITS[UnitID.Zergling])
             if len(self.queued) <= 8:
                 self.queued = []
 
