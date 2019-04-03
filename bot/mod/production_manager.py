@@ -25,7 +25,7 @@ class ProductionManager(LowLevelModule):
     - Pick workers/lavras to build stuff
     """
     def __init__(self, global_info):
-        super(ProductionManager, self).__init__(global_info)
+        super().__init__(global_info)
 
         self.units_pending = []
         self.all_built = []
@@ -51,7 +51,7 @@ class ProductionManager(LowLevelModule):
 
                 if unit_type in FROM_LARVA_TYPE:
                     # Pick a larva and build the unit required
-                    larvas = get_all(units, UNITS[UnitID.Larva])
+                    larvas = get_all_owned(units, UNITS[UnitID.Larva])
                     if len(larvas) > 0:
                         selected_larva = random.choice(larvas)
 
@@ -65,7 +65,7 @@ class ProductionManager(LowLevelModule):
 
                 elif unit_type in FROM_DRONE_TYPE:
                     # Pick a drone and build it in a proper place
-                    drones = get_all(units, UNITS[UnitID.Drone])
+                    drones = get_all_owned(units, UNITS[UnitID.Drone])
                     if len(drones) > 0:
                         # Pick drone
                         selected_drone = random.choice(drones)

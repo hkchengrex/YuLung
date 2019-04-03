@@ -10,6 +10,7 @@ from bot.struct.unit_class import Unit
 from bot.mod.expansion_manager import ExpansionManager
 from bot.mod.production_manager import ProductionManager
 from bot.mod.comabt_manager import CombatManager
+from bot.mod.scout_manager import ScoutManager
 
 
 class Hypervisor:
@@ -24,6 +25,7 @@ class Hypervisor:
         self.expan_man = ExpansionManager(self.global_info)
         self.produ_man = ProductionManager(self.global_info)
         self.comba_man = CombatManager(self.global_info)
+        self.scout_man = ScoutManager(self.global_info)
 
         self.global_info.log_game_info("Hypervisor initialized.")
 
@@ -35,6 +37,7 @@ class Hypervisor:
 
         self.expan_man.update_expansion(units)
         self.produ_man.set_base_location(self.expan_man.own_expansion()[0].pos)
+        self.scout_man.set_scout_tar([exp.pos for exp in self.expan_man.expansion])
 
         """
         Hardcoded simple rules here
@@ -65,6 +68,10 @@ class Hypervisor:
             return action
 
         action = self.produ_man.update(units)
+        if action is not None:
+            return action
+
+        action = self.scout_man.update(units)
         if action is not None:
             return action
 

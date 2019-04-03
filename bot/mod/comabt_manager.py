@@ -16,7 +16,7 @@ class CombatManager(LowLevelModule):
     - Fight
     """
     def __init__(self, global_info):
-        super(CombatManager, self).__init__(global_info)
+        super().__init__(global_info)
 
         self.queued = []
         self.attack_target = point.Point(0, 0)

@@ -29,7 +29,7 @@ class ExpansionManager(LowLevelModule):
     - Record ownership of expansions
     """
     def __init__(self, global_info):
-        super(ExpansionManager, self).__init__(global_info)
+        super().__init__(global_info)
 
         self.expansion = []  # type: typing.List[Expansion]
 

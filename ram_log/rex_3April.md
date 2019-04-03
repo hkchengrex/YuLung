@@ -6,3 +6,5 @@
 - Improved building placement
 - Tried to fix finding expansion but it is hard to locate self/enemy base with 
 distance alone. Thinking of hardcoding.
+
+- Basic scouting working
