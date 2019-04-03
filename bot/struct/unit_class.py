@@ -1,5 +1,5 @@
 from bot.util.static_units import UNITS, UnitID
-from bot.util.id_lookup import *
+from bot.util.unit_ids import *
 from bot.util.unit_info import Attribute, Weapon, UnitType
 from pysc2.lib.raw_units import RawUnit
 
@@ -20,9 +20,9 @@ class Unit(RawUnit):
     @property
     def is_comabt_unit(self):
         return self.unit_type not in [
-            UnitID.Drone,
-            UnitID.Overlord,
-            UnitID.Larva,
-        ] + ZERG_BUILDINGS_ID
+            UNITS[UnitID.Drone],
+            UNITS[UnitID.Overlord],
+            UNITS[UnitID.Larva],
+        ] + ZERG_BUILDINGS_TYPE
 
 

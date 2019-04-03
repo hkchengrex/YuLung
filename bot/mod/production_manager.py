@@ -6,6 +6,7 @@ from bot.util.static_units import UNITS, UnitID
 from bot.util.unit_info import Attribute, Weapon, UnitType
 from bot.util.helper import *
 from bot.util import unit_info
+from bot.util.unit_ids import *
 from bot.queries import *
 
 from s2clientprotocol import (
@@ -15,37 +16,6 @@ from s2clientprotocol import (
 from pysc2.lib import actions
 from pysc2.lib import point
 FUNCTIONS = actions.FUNCTIONS
-
-FROM_LARVA = [
-    UNITS[UnitID.Drone],
-    UNITS[UnitID.Zergling],
-    UNITS[UnitID.Hydralisk],
-    UNITS[UnitID.Roach],
-    UNITS[UnitID.Infestor],
-    UNITS[UnitID.SwarmHostMP],
-    UNITS[UnitID.Ultralisk],
-    UNITS[UnitID.Overlord],
-    UNITS[UnitID.Mutalisk],
-    UNITS[UnitID.Corruptor],
-    UNITS[UnitID.Viper],
-]
-
-FROM_DRONE = [
-    UNITS[UnitID.Hatchery],
-    UNITS[UnitID.Extractor],
-    UNITS[UnitID.SpawningPool],
-    UNITS[UnitID.EvolutionChamber],
-    UNITS[UnitID.SpineCrawler],
-    UNITS[UnitID.SporeCrawler],
-    UNITS[UnitID.RoachWarren],
-    UNITS[UnitID.BanelingNest],
-    UNITS[UnitID.HydraliskDen],
-    UNITS[UnitID.LurkerDenMP],
-    UNITS[UnitID.InfestationPit],
-    UNITS[UnitID.Spire],
-    UNITS[UnitID.NydusNetwork],
-    UNITS[UnitID.UltraliskCavern],
-]
 
 
 class ProductionManager(LowLevelModule):
@@ -59,6 +29,7 @@ class ProductionManager(LowLevelModule):
 
         self.units_pending = []
         self.all_built = []
+        self.base_loc = None
 
     def build_asap(self, unit_type: UnitType, amount=1):
         self.units_pending.extend([unit_type] * amount)
@@ -68,6 +39,9 @@ class ProductionManager(LowLevelModule):
         self.units_pending = self.units_pending[1:]
         self.all_built.append(type)
 
+    def set_base_location(self, base_loc: point):
+        self.base_loc = base_loc  # type: point
+
     def update(self, units):
 
         planned_action = None
@@ -75,9 +49,9 @@ class ProductionManager(LowLevelModule):
         for unit_type in self.units_pending:
             if self.global_info.can_afford_unit(unit_type):
 
-                if unit_type in FROM_LARVA:
+                if unit_type in FROM_LARVA_TYPE:
                     # Pick a larva and build the unit required
-                    larvas = unit_info.get_all(units, UNITS[UnitID.Larva])
+                    larvas = get_all(units, UNITS[UnitID.Larva])
                     if len(larvas) > 0:
                         selected_larva = random.choice(larvas)
 
@@ -87,18 +61,18 @@ class ProductionManager(LowLevelModule):
                             planned_action = get_raw_action_id(unit_type.ability_id)("now", [selected_larva.tag])
                             print(planned_action)
                         else:
-                            self.logger.log_game_info('Tried to morph: ' + unit_type.name + ' but we cannot.', False)
+                            self.logger.log_game_verbose('Tried to morph: ' + unit_type.name + ' but we cannot.')
 
-                elif unit_type in FROM_DRONE:
+                elif unit_type in FROM_DRONE_TYPE:
                     # Pick a drone and build it in a proper place
-                    drones = unit_info.get_all(units, UNITS[UnitID.Drone])
+                    drones = get_all(units, UNITS[UnitID.Drone])
                     if len(drones) > 0:
                         # Pick drone
                         selected_drone = random.choice(drones)
 
                         # Pick location
-                        ran_x = random.randint(0, 6000)
-                        ran_y = random.randint(0, 6000)
+                        ran_x = random.randint(-3000, 3000) + self.base_loc.x
+                        ran_y = random.randint(-3000, 3000) + self.base_loc.y
                         p = point.Point(ran_x, ran_y)
                         result = query_building_placement(self.sc2_env, unit_type.ability_id, p)
 

@@ -3,7 +3,7 @@ from pysc2.env.sc2_env import SC2Env
 
 from bot.mod.global_info import GlobalInfo
 from bot.util.static_units import UNITS, UnitID
-from bot.util import unit_info
+from bot.util.helper import *
 
 from bot.struct.unit_class import Unit
 
@@ -33,15 +33,16 @@ class Hypervisor:
         units = [Unit(u) for u in obs.observation.raw_units]
         self.global_info.update(obs)
 
-        self.expan_man.refresh_expansion(units)
+        self.expan_man.update_expansion(units)
+        self.produ_man.set_base_location(self.expan_man.own_expansion()[0].pos)
 
         """
         Hardcoded simple rules here
         """
-        drones = unit_info.get_all(units, UNITS[UnitID.Drone]) \
-                 + unit_info.get_all(self.produ_man.all_built, UNITS[UnitID.Drone])
-        pools = unit_info.get_all(units, UNITS[UnitID.SpawningPool]) \
-                + unit_info.get_all(self.produ_man.all_built, UNITS[UnitID.SpawningPool])
+        drones = get_all(units, UNITS[UnitID.Drone]) \
+                 + get_all(self.produ_man.all_built, UNITS[UnitID.Drone])
+        pools = get_all(units, UNITS[UnitID.SpawningPool]) \
+                + get_all(self.produ_man.all_built, UNITS[UnitID.SpawningPool])
 
         # print(self.produ_man.all_built)
 
@@ -53,7 +54,7 @@ class Hypervisor:
             else:
                 self.produ_man.build_asap(UNITS[UnitID.Zergling])
 
-        self.comba_man.set_attack_tar(self.expan_man.enemy_expansion[0])
+        self.comba_man.set_attack_tar(self.expan_man.enemy_expansion()[0].pos)
         """
         End of hardcoded simple rules
         """

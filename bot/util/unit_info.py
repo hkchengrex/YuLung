@@ -3,6 +3,7 @@ from typing import List
 import enum
 from s2clientprotocol import data_pb2 as sc_data
 
+
 class Attribute(enum.IntEnum):
     Light = 1
     Armored = 2
@@ -18,6 +19,14 @@ class Attribute(enum.IntEnum):
 
     def gen_py(self):
         return 'Attribute.' + self.name
+
+
+class Alliance(enum.IntEnum):
+  Self = 1
+  Ally = 2
+  Neutral = 3
+  Enemy = 4
+
 
 
 @dataclass
@@ -135,15 +144,3 @@ class UnitType:
                  self.movement_speed, self.armor, weapons))
 
 
-def get_all(units, unit_type):
-    if len(units) == 0:
-        return []
-
-    if type(units[0]) == UnitType:
-        return [u for u in units if u.unit_id == unit_type.unit_id]
-    else:
-        return [u for u in units if u.unit_type == unit_type.unit_id]
-
-
-def get_all_owned(units, unit_type):
-    return [u for u in units if u.unit_type == unit_type.unit_id and u.alliance == 1]
