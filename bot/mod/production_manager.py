@@ -66,6 +66,9 @@ class ProductionManager(LowLevelModule):
                 elif unit_type in FROM_DRONE_TYPE:
                     # Pick a drone and build it in a proper place
                     drones = get_all_owned(units, UNITS[UnitID.Drone])
+
+                    # Don't take the drones that have missions
+                    drones = [d for d in drones if not d.has_ongoing_action]
                     if len(drones) > 0:
                         # Pick drone
                         selected_drone = random.choice(drones)

@@ -204,7 +204,7 @@ class ExpansionManager(LowLevelModule):
             new_ownership = None
             if belong_to_enemy:
                 new_ownership = Alliance.Enemy
-            elif not exp.is_main:
+            elif exp.ownership == Alliance.Enemy and not exp.is_main:
                 # Cannot convert enemy's main to neutral easily
                 new_ownership = Alliance.Neutral
 

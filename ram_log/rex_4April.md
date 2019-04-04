@@ -17,3 +17,5 @@ the amount the minerals required to build one of the hatcheries. But then I thou
 I can build both at the same time without realizing I can only build one. And 
 thus I kicked both out of the queue.
 - Solution: early return!
+
+- Use on_going_action to avoid randomly picking a drone with mission to do

@@ -1,6 +1,5 @@
 import random
-
-from pysc2.lib import actions
+import typing
 
 from bot.util.helper import *
 from .low_level_module import LowLevelModule
