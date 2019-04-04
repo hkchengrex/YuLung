@@ -7,6 +7,8 @@ from bot.mod.production_manager import ProductionManager
 from bot.mod.scout_manager import ScoutManager
 from bot.util.helper import *
 
+from bot.mod.worker_manager import WorkerManager
+
 
 class Hypervisor:
     """
@@ -22,6 +24,7 @@ class Hypervisor:
         self.comba_man = CombatManager(self.global_info)
         self.scout_man = ScoutManager(self.global_info)
         self.scout_man.go_scout_once()
+        self.work_man = WorkerManager(self.global_info)
 
         self.global_info.log_game_info("Hypervisor initialized.")
 
@@ -61,12 +64,18 @@ class Hypervisor:
                 self.produ_man.build_asap(UNITS[UnitID.Zergling])
 
         self.comba_man.set_attack_tar(self.expan_man.enemy_expansion()[0].pos)
+        self.work_man.track(units)
         """
         End of hardcoded simple rules
         """
 
         # Define priorities here. TODO: Might need to give priorities dynamically
         action = self.comba_man.update(units)
+        if action is not None:
+            return action
+        
+
+        action = self.work_man.assign(units)
         if action is not None:
             return action
 
