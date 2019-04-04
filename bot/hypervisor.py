@@ -1,16 +1,11 @@
-from pysc2.lib import point
 from pysc2.env.sc2_env import SC2Env
 
-from bot.mod.global_info import GlobalInfo
-from bot.util.static_units import UNITS, UnitID
-from bot.util.helper import *
-
-from bot.struct.unit_class import Unit
-
-from bot.mod.expansion_manager import ExpansionManager
-from bot.mod.production_manager import ProductionManager
 from bot.mod.comabt_manager import CombatManager
+from bot.mod.expansion_manager import ExpansionManager
+from bot.mod.global_info import GlobalInfo
+from bot.mod.production_manager import ProductionManager
 from bot.mod.scout_manager import ScoutManager
+from bot.util.helper import *
 
 
 class Hypervisor:

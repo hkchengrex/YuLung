@@ -1,10 +1,9 @@
 from pysc2.env.sc2_env import SC2Env
 
-from bot.util.game_logger import GameLogger
 from bot.struct.resources import Resources, player_to_resources
-
-from bot.util.unit_info import UnitType
 from bot.util.consistent_units import ConsistentUnits
+from bot.util.game_logger import GameLogger
+from bot.util.unit_info import UnitType
 
 
 class GlobalInfo(GameLogger):

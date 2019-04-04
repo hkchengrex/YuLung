@@ -14,17 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import collections
-
 from absl import app
 from pysc2 import maps
 from pysc2 import run_configs
 from pysc2.lib import static_data
-
 from s2clientprotocol import common_pb2 as sc_common
 from s2clientprotocol import sc2api_pb2 as sc_pb
 
-from .unit_info import Attribute, Weapon, UnitType
+from .unit_info import UnitType
 
 
 def get_data():

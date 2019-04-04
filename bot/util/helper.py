@@ -1,8 +1,7 @@
 from pysc2.lib import actions
-from typing import List
 
-from bot.util.unit_info import *
 from bot.struct.unit_class import *
+from bot.util.unit_info import *
 
 
 def get_raw_action_id(abaility_id):

@@ -1,9 +1,8 @@
+import pysc2.lib
 from pysc2.agents import base_agent
 from pysc2.lib import actions
-import pysc2.lib
 
 from .hypervisor import Hypervisor
-from bot.util.game_logger import GameLogger
 
 FUNCTIONS = actions.FUNCTIONS
 

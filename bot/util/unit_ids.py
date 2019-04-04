@@ -1,6 +1,6 @@
-from bot.util import unit_info
+from pysc2.lib.units import Neutral
+
 from bot.util.static_units import UNITS, UnitID
-from pysc2.lib.units import Neutral, Terran, Zerg, Protoss
 
 """
 This file contains lists of useful unit ids

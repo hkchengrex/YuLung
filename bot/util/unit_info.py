@@ -1,6 +1,7 @@
+import enum
 from dataclasses import dataclass
 from typing import List
-import enum
+
 from s2clientprotocol import data_pb2 as sc_data
 
 

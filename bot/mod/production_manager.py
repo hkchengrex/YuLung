@@ -1,21 +1,14 @@
 import random
 
-from .low_level_module import LowLevelModule
-
-from bot.util.static_units import UNITS, UnitID
-from bot.util.unit_info import Attribute, Weapon, UnitType
-from bot.util.helper import *
-from bot.util import unit_info
-from bot.util.unit_ids import *
-from bot.util import grid_ordering
-from bot.queries import *
-
-from s2clientprotocol import (
-    error_pb2 as error_pb,
-)
-
 from pysc2.lib import actions
 from pysc2.lib import point
+
+from bot.queries import *
+from bot.util import grid_ordering
+from bot.util.helper import *
+from bot.util.unit_ids import *
+from .low_level_module import LowLevelModule
+
 FUNCTIONS = actions.FUNCTIONS
 
 

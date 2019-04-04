@@ -1,10 +1,10 @@
-import typing
-
-from bot.util.static_units import UNITS, UnitID
 from bot.util.unit_ids import *
-from bot.util.unit_info import Attribute, Weapon, UnitType
 
 from pysc2.lib.raw_units import RawUnit
+from pysc2.lib.raw_units import RawUnit
+
+from bot.util.unit_ids import *
+
 
 class Unit(RawUnit):
     """

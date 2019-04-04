@@ -1,14 +1,10 @@
 import random
-import typing
 
+from pysc2.lib import actions
+
+from bot.util.helper import *
 from .low_level_module import LowLevelModule
 
-from bot.util.static_units import UNITS, UnitID
-from bot.util.unit_info import Attribute, Weapon, UnitType
-from bot.util.helper import *
-from bot.queries import *
-
-from pysc2.lib import actions, point
 FUNCTIONS = actions.FUNCTIONS
 
 

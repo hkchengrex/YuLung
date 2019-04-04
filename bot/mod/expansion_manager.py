@@ -1,16 +1,9 @@
-import typing
-
-from pysc2.lib.units import Neutral, Terran, Zerg, Protoss
-from pysc2.lib import raw_units as ru
-from pysc2.env.sc2_env import SC2Env
 from pysc2.lib import point
-
-from .low_level_module import LowLevelModule
-
-from bot.util.helper import *
 
 from bot.struct.expansion import *
 from bot.struct.unit_class import *
+from bot.util.helper import *
+from .low_level_module import LowLevelModule
 
 """
 Constants

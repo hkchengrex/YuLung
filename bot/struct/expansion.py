@@ -1,8 +1,7 @@
-import enum
 import typing
 
-from bot.util.unit_info import Alliance
 from bot.struct.unit_class import Unit
+from bot.util.unit_info import Alliance
 
 
 class Expansion:
