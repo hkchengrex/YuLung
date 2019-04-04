@@ -1,5 +1,4 @@
 import random
-import typing
 
 from bot.util.helper import *
 from .low_level_module import LowLevelModule
@@ -16,20 +15,29 @@ class ScoutManager(LowLevelModule):
     def __init__(self, global_info):
         super().__init__(global_info)
 
-        self.seen_buildings = []
+        self.seen_types = set()
+        self.recorded_tech = set()
+
         self.scout_targets = []
         self.scout_routine = []
 
         self.active_scout_tag = None  # type: int
+
+        # Build DAG for tech requirement
+        self.tech_DAG = {}
+        for _, u in UNITS.items():
+            self.tech_DAG[u.unit_id] = u.tech_requirement
 
     def set_scout_tar(self, targets):
         self.scout_targets = targets
         if len(self.scout_routine) == 0:
             self.scout_routine = self.scout_targets
 
-    def update(self, units: typing.List[Unit], units_tag_dict: typing.Dict[int, Unit]):
+    def update(self, units: List[Unit], units_tag_dict: Dict[int, Unit]):
 
         planned_action = None
+
+        self.record_observation(units)
 
         active_scout = units_tag_dict.get(self.active_scout_tag, None)
 
@@ -58,4 +66,26 @@ class ScoutManager(LowLevelModule):
                 active_scout.has_ongoing_action = True
 
         return planned_action
+
+    def record_observation(self, units: List[Unit]):
+        enemy_types = set([u.unit_type for u in units if u.alliance == Alliance.Enemy])
+        new_types = enemy_types - self.seen_types
+
+        if len(new_types) == 0:
+            return
+
+        self.seen_types = self.seen_types.union(new_types)
+        self.logger.log_game_info('Scout sees something new: %s' % str(new_types))
+
+        while len(new_types) > 0:
+            unit_type = new_types[0]
+            parent = self.tech_DAG[unit_type]
+            if parent != 0 and parent not in self.seen_types:
+                self.logger.log_game_info('Scout resolves something new: %s from DAG' % str(parent))
+                new_types = new_types.remove(parent)
+
+
+
+
+
 

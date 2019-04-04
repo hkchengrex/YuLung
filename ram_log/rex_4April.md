@@ -2,7 +2,7 @@ TODO:
 - Build new expansion (done)
 - Don't do suicidal scouting
 - Make generic unit consistency across frames (Done)
-- Scout observation
+- Scout observation (partly done)
 
 - Oh I just missed some mineral types that's why it doesn't work
 - Fixed expansion location checking in Abiogenesis
@@ -19,3 +19,5 @@ thus I kicked both out of the queue.
 - Solution: early return!
 
 - Use on_going_action to avoid randomly picking a drone with mission to do
+
+- Need inverse lookup on SC2 id <-> our ids

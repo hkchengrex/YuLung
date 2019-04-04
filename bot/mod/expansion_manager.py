@@ -26,7 +26,7 @@ class ExpansionManager(LowLevelModule):
     def __init__(self, global_info):
         super().__init__(global_info)
 
-        self.expansion = []  # type: typing.List[Expansion]
+        self.expansion = []  # type: List[Expansion]
 
         # Hardcoded approximate enemy start location
         if 'Simple' in self.sc2_env._map_name:
@@ -43,7 +43,7 @@ class ExpansionManager(LowLevelModule):
     def neutral_expansion(self):
         return [e for e in self.expansion if e.ownership == Alliance.Neutral]
 
-    def init_expansion(self, units: typing.List[Unit]):
+    def init_expansion(self, units: List[Unit]):
         """
         - Finds all expansion locations by clustering the resources fields once
         - Find initial set of owned/enemy's base

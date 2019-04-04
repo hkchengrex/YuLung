@@ -1,7 +1,6 @@
 from bot.util.unit_ids import *
 
 from pysc2.lib.raw_units import RawUnit
-from pysc2.lib.raw_units import RawUnit
 
 from bot.util.unit_ids import *
 
