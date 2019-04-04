@@ -8,10 +8,16 @@ This file contains lists of useful unit ids
 
 # Ids for all kinds of mineral patches
 MINERAL_UNIT_ID = [Neutral.MineralField, Neutral.MineralField750,
-                   Neutral.RichMineralField, Neutral.RichMineralField750]
+                   Neutral.RichMineralField, Neutral.RichMineralField750,
+                   Neutral.BattleStationMineralField, Neutral.BattleStationMineralField750,
+                   Neutral.LabMineralField, Neutral.LabMineralField750,
+                   Neutral.PurifierMineralField, Neutral.PurifierMineralField750,
+                   Neutral.PurifierRichMineralField, Neutral.PurifierRichMineralField750]
 
 # Ids for all gas patches
-GAS_UNIT_ID = [Neutral.VespeneGeyser, Neutral.RichVespeneGeyser]
+GAS_UNIT_ID = [Neutral.VespeneGeyser, Neutral.RichVespeneGeyser,
+               Neutral.ProtossVespeneGeyser, Neutral.PurifierVespeneGeyser,
+               Neutral.ShakurasVespeneGeyser]
 
 # Ids for everything that does not move
 ALL_BUILDING_ID = []

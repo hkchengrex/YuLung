@@ -1,4 +1,4 @@
-from pysc2.lib import raw_units as ru
+from pysc2.lib import point
 from pysc2.env.sc2_env import SC2Env
 
 from bot.mod.global_info import GlobalInfo
@@ -32,16 +32,23 @@ class Hypervisor:
         self.produ_man.build_asap(UNITS[UnitID.Overlord])
 
     def process(self, obs):
-        units = [Unit(u) for u in obs.observation.raw_units]
-        self.global_info.update(obs)
+        units, units_tag_dict = self.global_info.update(obs)
 
-        self.expan_man.update_expansion(units)
-        self.produ_man.set_base_location(self.expan_man.own_expansion()[0].pos)
+        hatchery_build_pos = self.expan_man.update_expansion(units, units_tag_dict)
+
+        for pos in hatchery_build_pos:
+            self.produ_man.build_asap(UNITS[UnitID.Hatchery], pos)
+
+        self.produ_man.set_base_locations([exp.pos for exp in self.expan_man.own_expansion() if exp.base is not None])
+
         self.scout_man.set_scout_tar([exp.pos for exp in self.expan_man.expansion])
 
         """
         Hardcoded simple rules here
         """
+        if len(self.expan_man.own_expansion()) < 2:
+            self.expan_man.claim_expansion(self.expan_man.get_next_expansion())
+
         drones = get_all(units, UNITS[UnitID.Drone]) \
                  + get_all(self.produ_man.all_built, UNITS[UnitID.Drone])
         pools = get_all(units, UNITS[UnitID.SpawningPool]) \
@@ -71,7 +78,7 @@ class Hypervisor:
         if action is not None:
             return action
 
-        action = self.scout_man.update(units)
+        action = self.scout_man.update(units, units_tag_dict)
         if action is not None:
             return action
 

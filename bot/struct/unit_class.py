@@ -1,8 +1,10 @@
+import typing
+
 from bot.util.static_units import UNITS, UnitID
 from bot.util.unit_ids import *
 from bot.util.unit_info import Attribute, Weapon, UnitType
-from pysc2.lib.raw_units import RawUnit
 
+from pysc2.lib.raw_units import RawUnit
 
 class Unit(RawUnit):
     """
@@ -18,11 +20,24 @@ class Unit(RawUnit):
         self.is_a_scout = False
 
     @property
-    def is_comabt_unit(self):
+    def is_combat_unit(self):
+        if self.is_a_scout:
+            return False
+
         return self.unit_type not in [
             UNITS[UnitID.Drone],
             UNITS[UnitID.Overlord],
             UNITS[UnitID.Larva],
         ] + ZERG_BUILDINGS_TYPE
 
+    def update(self, old_unit):
+        """
+        Propagate all custom information from old_unit to self.
+        Returns self.
+        """
 
+        if old_unit is not None:
+            self.has_ongoing_action = old_unit.has_ongoing_action
+            self.is_a_scout = old_unit.is_a_scout
+
+        return self

@@ -37,7 +37,7 @@ def get_all(units, unit_type, ownership=None) -> List[Unit]:
         else:
             unit_type_list = [unit_type]
     else:
-        if type(unit_type) == UnitType:
+        if type(unit_type[0]) == UnitType:
             unit_type_list = [u.unit_id for u in unit_type]
         else:
             unit_type_list = unit_type

@@ -1,4 +1,5 @@
 import random
+import typing
 
 from .low_level_module import LowLevelModule
 
@@ -7,8 +8,7 @@ from bot.util.unit_info import Attribute, Weapon, UnitType
 from bot.util.helper import *
 from bot.queries import *
 
-from pysc2.lib import actions
-from pysc2.lib import point
+from pysc2.lib import actions, point
 FUNCTIONS = actions.FUNCTIONS
 
 
@@ -25,47 +25,42 @@ class ScoutManager(LowLevelModule):
         self.scout_targets = []
         self.scout_routine = []
 
-        self.active_scout = None  # type: Unit
+        self.active_scout_tag = None  # type: int
 
     def set_scout_tar(self, targets):
         self.scout_targets = targets
         if len(self.scout_routine) == 0:
             self.scout_routine = self.scout_targets
 
-    def update(self, units):
+    def update(self, units: typing.List[Unit], units_tag_dict: typing.Dict[int, Unit]):
 
         planned_action = None
 
-        # Find scout
-        if self.active_scout is not None:
-            scout_found = False
-            for u in units:
-                if self.active_scout.tag == u.tag:
-                    self.active_scout = u
-                    scout_found = True
-
-            if not scout_found:
-                self.active_scout = None  # Whoops it is dead
+        active_scout = units_tag_dict.get(self.active_scout_tag, None)
 
         # Pick a scout
-        if self.active_scout is None:
+        if active_scout is None:
             overlords = get_all_owned(units, UNITS[UnitID.Overlord])
             if len(overlords) > 0:
-                self.active_scout = random.choice(overlords)
+                active_scout = random.choice(overlords)
 
         # Send it to scout
-        if self.active_scout.pos.dist(self.scout_routine[0]) < 500:
-            # Reset target
-            if len(self.scout_routine) == 1:
-                self.scout_routine = self.scout_targets
-            else:
-                self.scout_routine = self.scout_routine[1:]
+        if active_scout is not None:
+            self.active_scout_tag = active_scout.tag
+            active_scout.is_a_scout = True
 
-            print(self.scout_targets, self.scout_routine)
+            if active_scout.pos.dist(self.scout_routine[0]) < 500:
+                # Reset target
+                if len(self.scout_routine) == 1:
+                    self.scout_routine = self.scout_targets
+                else:
+                    self.scout_routine = self.scout_routine[1:]
+                active_scout.has_ongoing_action = False
 
-        # Send
-        # TODO: Dont send every time
-        planned_action = get_raw_action_id(3674)("now", self.scout_routine[0], [self.active_scout.tag])
+            # Send action sparsely
+            if not active_scout.has_ongoing_action:
+                planned_action = get_raw_action_id(3674)("now", self.scout_routine[0], [self.active_scout_tag])
+                active_scout.has_ongoing_action = True
 
         return planned_action
 
