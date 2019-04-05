@@ -38,7 +38,7 @@ class ProductionManager(LowLevelModule):
     def set_base_locations(self, base_locations: List[point.Point]):
         self.base_locations = base_locations  # type: List[point.Point]
 
-    def update(self, units):
+    def update(self, units, units_tag_dict):
 
         planned_action = None
         # print(self.units_pending)
@@ -69,6 +69,7 @@ class ProductionManager(LowLevelModule):
 
                     # Don't take the drones that have missions
                     drones = [d for d in drones if not d.has_ongoing_action]
+
                     if len(drones) > 0:
                         # Pick drone
                         selected_drone = random.choice(drones)
@@ -95,6 +96,7 @@ class ProductionManager(LowLevelModule):
                         # See https://github.com/Blizzard/s2client-proto/blob/master/s2clientprotocol/error.proto
                         if result == 1:
                             self.record_build(unit_type)
+                            selected_drone.has_ongoing_action = True
                             planned_action = get_raw_action_id(unit_type.ability_id)(
                                 "now", build_pos, [selected_drone.tag])
                             return planned_action

@@ -69,7 +69,7 @@ class Hypervisor:
         if action is not None:
             return action
 
-        action = self.produ_man.update(units)
+        action = self.produ_man.update(units, units_tag_dict)
         if action is not None:
             return action
 

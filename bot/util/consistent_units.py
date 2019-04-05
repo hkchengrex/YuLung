@@ -16,12 +16,15 @@ class ConsistentUnits:
         self.units = []  # type: typing.List[Unit]
 
     def update(self, raw_units):
-        self.units = [Unit(u) for u in raw_units]
+        self.units = []
         new_units_tag_dict = {}
 
-        for u in self.units:
-            new_units_tag_dict[u.tag] = u.update(
-                self.units_tag_dict.get(u.tag, None))
+        for u in raw_units:
+            new_unit = Unit(u)
+            new_unit = new_unit.update(self.units_tag_dict.get(u.tag, None))
+
+            new_units_tag_dict[new_unit.tag] = new_unit
+            self.units.append(new_unit)
 
         self.units_tag_dict = new_units_tag_dict
 

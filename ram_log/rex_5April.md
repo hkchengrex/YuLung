@@ -5,3 +5,6 @@
 - TODO: More stable construction, need to keep track end-to-end -- be 100% sure 
 that sth will be / is constructed.
 - TODO: worker management
+
+- Fix consistent unit list
+- Fix "re-sending drone avoidance" in production manager
