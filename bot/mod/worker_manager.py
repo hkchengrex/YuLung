@@ -27,8 +27,8 @@ class WorkerManager(LowLevelModule):
         self.harvest = False'''
         
     def track(self, units):
-        all_bases = get_all(units, UNITS[UnitID.Hatchery])
-        all_drones = get_all(units, UNITS[UnitID.Drone])
+        all_bases = get_all_owned(units, UNITS[UnitID.Hatchery])
+        all_drones = get_all_owned(units, UNITS[UnitID.Drone])
         
         if len(self.bases) == 0 and len(self.drones) == 0:
             for base in all_bases:
@@ -69,7 +69,7 @@ class WorkerManager(LowLevelModule):
         planned_action = None
 
         """
-        all_drones = get_all(units, UNITS[UnitID.Drone])
+        all_drones = get_all_owned(units, UNITS[UnitID.Drone])
         for drone in all_drones:
             if drone not in self.drones_moved:
                 base = self.bases[0]
@@ -78,7 +78,7 @@ class WorkerManager(LowLevelModule):
                 self.drones_moved.append(drone)
                 return planned_action
         if len(self.drones_moved) >= 10 and self.harvest is False:
-            minerals = get_all(units, UNITS[UnitID.MineralField])
+            minerals = get_all_owned(units, UNITS[UnitID.MineralField])
             m_pos = []
             for m in minerals:
                 m_pos.append(point.Point(m.posx, m.posy))
@@ -95,8 +95,8 @@ class WorkerManager(LowLevelModule):
             self.harvest = True
             print("\n\nHarvest", mini, "\n\n")
         """
-        all_bases = get_all(units, UNITS[UnitID.Hatchery])
-        all_drones = get_all(units, UNITS[UnitID.Drone])
+        all_bases = get_all_owned(units, UNITS[UnitID.Hatchery])
+        all_drones = get_all_owned(units, UNITS[UnitID.Drone])
         max_worker = 16
         
         untracked_drones = [d for d in all_drones if d not in self.drones]

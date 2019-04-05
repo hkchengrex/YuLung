@@ -55,8 +55,11 @@ class Hypervisor:
 
         # print(self.produ_man.all_built)
 
+        bases = get_all_owned(units, UNITS[UnitID.Hatchery])
+        max_drones = len(bases) * 16
+
         if len(self.produ_man.units_pending) == 0:
-            if len(drones) < 12:
+            if len(drones) < max_drones:
                 self.produ_man.build_asap(UNITS[UnitID.Drone])
             elif len(pools) == 0:
                 self.produ_man.build_asap(UNITS[UnitID.SpawningPool])
@@ -88,4 +91,3 @@ class Hypervisor:
             return action
 
         return None
-
