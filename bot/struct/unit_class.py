@@ -17,6 +17,7 @@ class Unit(RawUnit):
 
         self.has_ongoing_action = False
         self.is_a_scout = False
+        self.action_detail = None
 
     @property
     def is_combat_unit(self):
@@ -38,5 +39,6 @@ class Unit(RawUnit):
         if old_unit is not None:
             self.has_ongoing_action = old_unit.has_ongoing_action
             self.is_a_scout = old_unit.is_a_scout
+            self.action_detail = old_unit.action_detail
 
         return self

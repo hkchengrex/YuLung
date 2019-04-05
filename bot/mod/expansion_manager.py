@@ -92,6 +92,7 @@ class ExpansionManager(LowLevelModule):
                     exp.ownership = Alliance.Self
                     exp.base = hatcheries[0]
                     exp.is_main = True
+                    self.global_info.home_pos = exp.pos
                     self.logger.log_game_info('Initial own expansion: ' + str(exp))
 
             if len(self.own_expansion()) > 0:

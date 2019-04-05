@@ -43,6 +43,9 @@ class ProductionManager(LowLevelModule):
         planned_action = None
         # print(self.units_pending)
 
+        drones = get_all_owned(units, UNITS[UnitID.Drone])
+        self.check_failed_construction(drones)
+
         for pending in self.units_pending:
             unit_type = pending['type']
             pos = pending['pos']
@@ -64,15 +67,12 @@ class ProductionManager(LowLevelModule):
                             self.logger.log_game_verbose('Tried to morph: ' + unit_type.name + ' but we cannot.')
 
                 elif unit_type in FROM_DRONE_TYPE:
-                    # Pick a drone and build it in a proper place
-                    drones = get_all_owned(units, UNITS[UnitID.Drone])
-
                     # Don't take the drones that have missions
-                    drones = [d for d in drones if not d.has_ongoing_action]
+                    usable_drones = [d for d in drones if not d.has_ongoing_action]
 
                     if len(drones) > 0:
                         # Pick drone
-                        selected_drone = random.choice(drones)
+                        selected_drone = random.choice(usable_drones)
 
                         # Pick location
                         if pos is None:
@@ -97,6 +97,7 @@ class ProductionManager(LowLevelModule):
                         if result == 1:
                             self.record_build(unit_type)
                             selected_drone.has_ongoing_action = True
+                            selected_drone.action_detail = pending
                             planned_action = get_raw_action_id(unit_type.ability_id)(
                                 "now", build_pos, [selected_drone.tag])
                             return planned_action
@@ -107,4 +108,13 @@ class ProductionManager(LowLevelModule):
                     raise NotImplementedError
 
         return planned_action
+
+    def check_failed_construction(self, drones):
+        drones = [d for d in drones if d.has_ongoing_action and d.order_len == 0]
+
+        for d in drones:
+            self.logger.log_game_info('Re-inserting %s into the production queue' % d.action_detail)
+            self.units_pending.extend([d.action_detail])
+            d.has_ongoing_action = False
+            d.action_detail = None
 

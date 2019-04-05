@@ -21,6 +21,7 @@ class Hypervisor:
         self.produ_man = ProductionManager(self.global_info)
         self.comba_man = CombatManager(self.global_info)
         self.scout_man = ScoutManager(self.global_info)
+        self.scout_man.go_scout_once()
 
         self.global_info.log_game_info("Hypervisor initialized.")
 

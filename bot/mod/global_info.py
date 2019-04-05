@@ -16,6 +16,7 @@ class GlobalInfo(GameLogger):
         super(GlobalInfo, self).__init__(sc2_env)
         self.resources = None  # type: Resources
         self.consistent_units = ConsistentUnits()
+        self.home_pos = None
 
     def update(self, obs):
         self.consistent_units.update(obs.observation.raw_units)

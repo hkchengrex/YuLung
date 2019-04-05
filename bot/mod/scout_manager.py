@@ -22,10 +22,13 @@ class ScoutManager(LowLevelModule):
         self.scout_targets = []
         self.scout_routine = []
 
+        self.curr_target = None
+
         self.enemy_tech = [False] * len(TECH_BUILDING_TYPE)
         self.enemy_strong_cloak = False
 
         self.active_scout_tag = None  # type: int
+        self.do_scout = False
 
         # Build DAG for tech requirement
         self.tech_DAG = {}
@@ -34,8 +37,9 @@ class ScoutManager(LowLevelModule):
 
     def set_scout_tar(self, targets):
         self.scout_targets = targets
-        if len(self.scout_routine) == 0:
-            self.scout_routine = self.scout_targets
+
+    def go_scout_once(self):
+        self.do_scout = True
 
     def update(self, units: List[Unit], units_tag_dict: Dict[int, Unit]):
 
@@ -50,24 +54,31 @@ class ScoutManager(LowLevelModule):
             overlords = get_all_owned(units, UNITS[UnitID.Overlord])
             if len(overlords) > 0:
                 active_scout = random.choice(overlords)
+                active_scout.is_a_scout = True
 
         # Send it to scout
         if active_scout is not None:
             self.active_scout_tag = active_scout.tag
-            active_scout.is_a_scout = True
 
-            if active_scout.pos.dist(self.scout_routine[0]) < 500:
-                # Reset target
-                if len(self.scout_routine) == 1:
-                    self.scout_routine = self.scout_targets
-                else:
-                    self.scout_routine = self.scout_routine[1:]
-                active_scout.has_ongoing_action = False
-
-            # Send action sparsely
+            # Send action once per target
             if not active_scout.has_ongoing_action:
-                planned_action = get_raw_action_id(3674)("now", self.scout_routine[0], [self.active_scout_tag])
+                if len(self.scout_routine) == 0:
+                    self.curr_target = self.global_info.home_pos
+                else:
+                    self.curr_target = self.scout_routine[0]
+                    self.scout_routine = self.scout_routine[1:]
+
                 active_scout.has_ongoing_action = True
+
+            # Change to next target when reached
+            if active_scout.pos.dist(self.curr_target) < 500:
+                # Reset target
+                if len(self.scout_routine) == 0 and self.do_scout:
+                    self.scout_routine = self.scout_targets
+                    self.do_scout = False
+                active_scout.has_ongoing_action = False
+            else:
+                planned_action = get_raw_action_id(3674)("now", self.curr_target, [self.active_scout_tag])
 
         return planned_action
 
