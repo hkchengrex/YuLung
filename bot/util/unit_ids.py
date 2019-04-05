@@ -85,3 +85,41 @@ FROM_DRONE_TYPE = [
     UNITS[UnitID.NydusNetwork],
     UNITS[UnitID.UltraliskCavern],
 ]
+
+# These buildings are considered non-trivial observations
+TECH_BUILDING_TYPE = [
+    UNITS[UnitID.Factory],
+    UNITS[UnitID.Starport],
+    UNITS[UnitID.GhostAcademy],
+    UNITS[UnitID.FusionCore],
+    UNITS[UnitID.Armory],
+
+    UNITS[UnitID.CyberneticsCore],
+    UNITS[UnitID.TwilightCouncil],
+    UNITS[UnitID.RoboticsFacility],
+    UNITS[UnitID.TemplarArchive],
+    UNITS[UnitID.DarkShrine],
+    UNITS[UnitID.RoboticsBay],
+    UNITS[UnitID.FleetBeacon],
+
+    UNITS[UnitID.RoachWarren],
+    UNITS[UnitID.BanelingNest],
+    UNITS[UnitID.Lair],
+    UNITS[UnitID.HydraliskDen],
+    UNITS[UnitID.LurkerDenMP],
+    UNITS[UnitID.InfestationPit],
+    UNITS[UnitID.Spire],
+    UNITS[UnitID.NydusNetwork],
+    UNITS[UnitID.Hive],
+    UNITS[UnitID.UltraliskCavern],
+    UNITS[UnitID.GreaterSpire],
+]
+
+# These units are considered strong invisible units that need countering
+STRONG_CLOAK_TYPE = [
+    UNITS[UnitID.Ghost],
+    UNITS[UnitID.Banshee],
+    UNITS[UnitID.LurkerMP],
+    UNITS[UnitID.Mothership],
+    UNITS[UnitID.DarkTemplar],
+]

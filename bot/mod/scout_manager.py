@@ -1,6 +1,7 @@
 import random
 
 from bot.util.helper import *
+from bot.util.unit_ids import *
 from .low_level_module import LowLevelModule
 
 FUNCTIONS = actions.FUNCTIONS
@@ -20,6 +21,9 @@ class ScoutManager(LowLevelModule):
 
         self.scout_targets = []
         self.scout_routine = []
+
+        self.enemy_tech = [False] * len(TECH_BUILDING_TYPE)
+        self.enemy_strong_cloak = False
 
         self.active_scout_tag = None  # type: int
 
@@ -75,14 +79,26 @@ class ScoutManager(LowLevelModule):
             return
 
         self.seen_types = self.seen_types.union(new_types)
-        self.logger.log_game_info('Scout sees something new: %s' % str(new_types))
 
         while len(new_types) > 0:
-            unit_type = new_types[0]
+            unit_type = new_types.pop()
+            self.logger.log_game_info('Scout sees something new: %s' % rev_id2type(unit_type).name)
+            new_types.discard(unit_type)  # Remove will give key error
+
+            # Update tech vector
+            if rev_id2type(unit_type) in TECH_BUILDING_TYPE:
+                self.enemy_tech[TECH_BUILDING_TYPE.index(rev_id2type(unit_type))] = True
+
+            # Update strong cloak flag
+            if not self.enemy_strong_cloak and unit_type in STRONG_CLOAK_TYPE:
+                self.enemy_strong_cloak = True
+
+            # Resolve DAG
             parent = self.tech_DAG[unit_type]
             if parent != 0 and parent not in self.seen_types:
-                self.logger.log_game_info('Scout resolves something new: %s from DAG' % str(parent))
-                new_types = new_types.remove(parent)
+                self.logger.log_game_info('DAG resolved something new: %s' % rev_id2type(parent).name)
+                new_types.add(parent)
+                self.seen_types.add(parent)
 
 
 

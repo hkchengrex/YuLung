@@ -56,3 +56,12 @@ def get_all_owned(units, unit_type):
 
 def get_all_enemy(units, unit_type):
     return get_all(units, unit_type, Alliance.Enemy)
+
+
+_sc2_to_ours_reverse_id = {}
+for _, u in UNITS.items():
+    _sc2_to_ours_reverse_id[u.unit_id] = u
+
+
+def rev_id2type(unit_id: int) -> UnitType:
+    return _sc2_to_ours_reverse_id[unit_id]
