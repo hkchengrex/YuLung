@@ -5,11 +5,11 @@ from bot.mod.expansion_manager import ExpansionManager
 from bot.mod.global_info import GlobalInfo
 from bot.mod.production_manager import ProductionManager
 from bot.mod.scout_manager import ScoutManager
-<<<<<<< HEAD
+
 from bot.util.helper import *
-=======
+
 from bot.mod.worker_manager import WorkerManager
->>>>>>> Track Worker
+
 
 
 class Hypervisor:
@@ -53,11 +53,14 @@ class Hypervisor:
                  + get_all(self.produ_man.all_built, UNITS[UnitID.Drone])
         pools = get_all(units, UNITS[UnitID.SpawningPool]) \
                 + get_all(self.produ_man.all_built, UNITS[UnitID.SpawningPool])
+        
+        bases = get_all_owned(units, UNITS[UnitID.Hatchery])
+        max_drones = len(bases) * 16
 
         # print(self.produ_man.all_built)
 
         if len(self.produ_man.units_pending) == 0:
-            if len(drones) < 12:
+            if len(drones) < max_drones:
                 self.produ_man.build_asap(UNITS[UnitID.Drone])
             elif len(pools) == 0:
                 self.produ_man.build_asap(UNITS[UnitID.SpawningPool])
