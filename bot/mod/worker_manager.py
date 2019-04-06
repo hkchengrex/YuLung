@@ -107,10 +107,19 @@ class WorkerManager(LowLevelModule):
                     selected_drone = random.choice(untracked_drones)
                     base_index = self.drones_in_bases.index(drones_base_i)
                     base = self.bases[base_index]
-                    base_pos = point.Point(base.posx-1000, base.posy-1000)
-
-                    "Test action: Move assigned drone"
-                    planned_action = get_raw_action_id(16)("now", base_pos, [selected_drone.tag])
+                    base_pos = point.Point(base.posx, base.posy)
+                    
+                    minerals = get_all(units, UNITS[UnitID.MineralField])
+                    m_pos = []
+                    for m in minerals:
+                        m_pos.append(point.Point(m.posx, m.posy))
+                    mini = m_pos[0]
+                    for pos in m_pos:
+                        if base_pos.dist(pos) < base_pos.dist(mini):
+                            mini = pos
+                    close_m = minerals[m_pos.index(mini)]                    
+                    
+                    planned_action = get_raw_action_id(16)("now", mini, [selected_drone.tag])
                     
                     self.drones_in_bases[base_index].append(selected_drone)
                     self.drones.append(selected_drone)

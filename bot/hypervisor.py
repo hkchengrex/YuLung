@@ -75,9 +75,8 @@ class Hypervisor:
         # Define priorities here. TODO: Might need to give priorities dynamically
         action = self.comba_man.update(units)
         if action is not None:
-            return action
+            return action        
         
-
         action = self.work_man.assign(units)
         if action is not None:
             return action
