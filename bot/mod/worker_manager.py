@@ -27,7 +27,9 @@ class WorkerManager(LowLevelModule):
         self.harvest = False'''
         
     def track(self, units):
-        all_bases = get_all_owned(units, UNITS[UnitID.Hatchery])
+        all_bases = get_all_owned(units, UNITS[UnitID.Hatchery]) \
+                 + get_all_owned(units, UNITS[UnitID.Lair]) \
+                 + get_all_owned(units, UNITS[UnitID.Hive])
         all_drones = get_all_owned(units, UNITS[UnitID.Drone])
         
         if len(self.bases) == 0 and len(self.drones) == 0:
@@ -95,7 +97,9 @@ class WorkerManager(LowLevelModule):
             self.harvest = True
             print("\n\nHarvest", mini, "\n\n")
         """
-        all_bases = get_all_owned(units, UNITS[UnitID.Hatchery])
+        all_bases = get_all_owned(units, UNITS[UnitID.Hatchery]) \
+                 + get_all_owned(units, UNITS[UnitID.Lair]) \
+                 + get_all_owned(units, UNITS[UnitID.Hive])
         all_drones = get_all_owned(units, UNITS[UnitID.Drone])
         max_worker = 16
         

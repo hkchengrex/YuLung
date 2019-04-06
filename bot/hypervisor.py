@@ -55,7 +55,9 @@ class Hypervisor:
 
         # print(self.produ_man.all_built)
 
-        bases = get_all_owned(units, UNITS[UnitID.Hatchery])
+        bases = get_all_owned(units, UNITS[UnitID.Hatchery]) \
+                 + get_all_owned(units, UNITS[UnitID.Lair]) \
+                 + get_all_owned(units, UNITS[UnitID.Hive])
         max_drones = len(bases) * 16
 
         if len(self.produ_man.units_pending) == 0:
