@@ -4,11 +4,29 @@ from bot.struct.unit_class import *
 from bot.util.unit_info import *
 
 
-def get_raw_action_id(abaility_id):
-    fn_list = list(actions.ABILITY_IDS[abaility_id])
+def get_raw_pos_action_id(ability_id):
+    fn_list = list(actions.ABILITY_IDS[ability_id])
 
     for l in fn_list:
-        if 'raw' in l.name:
+        if 'raw_pos' in l.name:
+            return l
+    return None
+
+
+def get_raw_quick_action_id(ability_id):
+    fn_list = list(actions.ABILITY_IDS[ability_id])
+
+    for l in fn_list:
+        if 'raw_quick' in l.name:
+            return l
+    return None
+
+
+def get_raw_targeted_action_id(ability_id):
+    fn_list = list(actions.ABILITY_IDS[ability_id])
+
+    for l in fn_list:
+        if 'raw_targeted' in l.name:
             return l
     return None
 

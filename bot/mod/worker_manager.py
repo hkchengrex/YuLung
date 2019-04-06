@@ -1,16 +1,14 @@
 import random
 
-from .low_level_module import LowLevelModule
-
-from bot.util.static_units import UNITS, UnitID
-from bot.util.unit_info import Attribute, Weapon, UnitType
-from bot.util.helper import *
-from bot.util import unit_info
-from bot.queries import *
-
 from pysc2.lib import actions
 from pysc2.lib import point
+
+from bot.util.helper import *
+from bot.util.unit_ids import *
+from .low_level_module import LowLevelModule
+
 FUNCTIONS = actions.FUNCTIONS
+
 
 class WorkerManager(LowLevelModule):
     def __init__(self, global_info):
@@ -97,9 +95,7 @@ class WorkerManager(LowLevelModule):
             self.harvest = True
             print("\n\nHarvest", mini, "\n\n")
         """
-        all_bases = get_all_owned(units, UNITS[UnitID.Hatchery]) \
-                 + get_all_owned(units, UNITS[UnitID.Lair]) \
-                 + get_all_owned(units, UNITS[UnitID.Hive])
+        all_bases = get_all_owned(units, ZERG_BASES)
         all_drones = get_all_owned(units, UNITS[UnitID.Drone])
         max_worker = 16
         
@@ -123,7 +119,7 @@ class WorkerManager(LowLevelModule):
                             mini = pos
                     close_m = minerals[m_pos.index(mini)]                    
                     
-                    planned_action = get_raw_action_id(16)("now", mini, [selected_drone.tag])
+                    planned_action = FUNCTIONS.Harvest_Gather_raw_targeted("now", close_m.tag, [selected_drone.tag])
                     
                     self.drones_in_bases[base_index].append(selected_drone)
                     self.drones.append(selected_drone)

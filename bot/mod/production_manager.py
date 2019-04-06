@@ -61,7 +61,7 @@ class ProductionManager(LowLevelModule):
                         avail_abilities = query_available_abilities(self.sc2_env, selected_larva.tag)
                         if unit_type.ability_id in avail_abilities:
                             self.record_build(unit_type)
-                            planned_action = get_raw_action_id(unit_type.ability_id)("now", [selected_larva.tag])
+                            planned_action = get_raw_quick_action_id(unit_type.ability_id)("now", [selected_larva.tag])
                             return planned_action
                         else:
                             self.logger.log_game_verbose('Tried to morph: ' + unit_type.name + ' but we cannot.')
@@ -98,7 +98,7 @@ class ProductionManager(LowLevelModule):
                             self.record_build(unit_type)
                             selected_drone.has_ongoing_action = True
                             selected_drone.action_detail = pending
-                            planned_action = get_raw_action_id(unit_type.ability_id)(
+                            planned_action = get_raw_pos_action_id(unit_type.ability_id)(
                                 "now", build_pos, [selected_drone.tag])
                             return planned_action
                         else:
