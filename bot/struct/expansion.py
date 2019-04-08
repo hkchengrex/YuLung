@@ -1,7 +1,9 @@
 import typing
+from typing import Dict, List
 
 from bot.struct.unit_class import Unit
 from bot.util.unit_info import Alliance
+from bot.util.unit_ids import *
 
 
 class Expansion:
@@ -26,9 +28,21 @@ class Expansion:
     def __str__(self):
         return 'Expansion at %s owned by %s' % (str(self.pos), str(self.ownership))
 
-    def update(self, units_tag_dict: typing.Dict[int, Unit]):
+    def update(self, units_tag_dict: Dict[int, Unit]):
         if self.base is not None:
             self.base = units_tag_dict.get(self.base.tag, None)
+
+    def get_ideal_harvesters(self):
+        if self.base is not None:
+            return self.base.ideal_harvesters
+        else:
+            return 0
+
+    def get_assigned_harvesters(self):
+        if self.base is not None:
+            return self.base.assigned_harvesters
+        else:
+            return 0
 
     def reset(self):
         self.base = None

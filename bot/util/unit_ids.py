@@ -55,6 +55,18 @@ ZERG_BASES = [
     UNITS[UnitID.Hive],
 ]
 
+TERRAN_BASES = [
+    UNITS[UnitID.OrbitalCommand],
+    UNITS[UnitID.CommandCenter],
+    UNITS[UnitID.PlanetaryFortress],
+]
+
+PROTOSS_BASES = [
+    UNITS[UnitID.Nexus]
+]
+
+ALL_BASES = ZERG_BASES + TERRAN_BASES + PROTOSS_BASES
+
 FROM_LARVA_TYPE = [
     UNITS[UnitID.Drone],
     UNITS[UnitID.Zergling],

@@ -43,6 +43,12 @@ class ExpansionManager(LowLevelModule):
     def neutral_expansion(self):
         return [e for e in self.expansion if e.ownership == Alliance.Neutral]
 
+    def main_expansion(self):
+        for e in self.own_expansion():
+            if e.is_main:
+                return e
+        return None
+
     def init_expansion(self, units: List[Unit]):
         """
         - Finds all expansion locations by clustering the resources fields once
@@ -65,18 +71,18 @@ class ExpansionManager(LowLevelModule):
                         clusters.append([u])
 
             # Debug
-            for i, c in enumerate(clusters):
-                print('Cluster: ', len(c), c[0].pos)
-                # for m in c:
-                    # print(m.unit_type, m.pos)
+            # for i, c in enumerate(clusters):
+            #     print('Cluster: ', len(c), c[0].pos)
+            #     for m in c:
+            #         print(m.unit_type, m.pos)
 
             # Find centers
             for c in clusters:
                 center_pos = point.Point(sum([p.posx for p in c]) / len(c),
                               sum([p.posy for p in c]) / len(c))
 
-                minerals = [u for u in c if u.unit_type in MINERAL_UNIT_ID]
-                gases = [u for u in c if u.unit_type in GAS_UNIT_ID]
+                minerals = [m for m in c if m.unit_type in MINERAL_UNIT_ID]
+                gases = [g for g in c if g.unit_type in GAS_UNIT_ID]
                 self.expansion.append(Expansion(center_pos, minerals, gases))
 
             self.logger.log_game_info('Found %d expansions' % len(self.expansion))
