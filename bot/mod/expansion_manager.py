@@ -83,7 +83,8 @@ class ExpansionManager(LowLevelModule):
 
                 minerals = [m for m in c if m.unit_type in MINERAL_UNIT_ID]
                 gases = [g for g in c if g.unit_type in GAS_UNIT_ID]
-                self.expansion.append(Expansion(center_pos, minerals, gases))
+                drones = []
+                self.expansion.append(Expansion(center_pos, minerals, gases, drones))
 
             self.logger.log_game_info('Found %d expansions' % len(self.expansion))
 

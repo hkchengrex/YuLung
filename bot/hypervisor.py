@@ -76,7 +76,7 @@ class Hypervisor:
             self.produ_man.build_asap(UNITS[UnitID.Zergling])
 
         self.comba_man.set_attack_tar(self.expan_man.enemy_expansion()[0].pos)
-        self.work_man.track(units)
+        self.work_man.track(units, self.expan_man.expansion)
         """
         End of hardcoded simple rules
         """
@@ -86,7 +86,7 @@ class Hypervisor:
         if action is not None:
             return action        
         
-        action = self.work_man.assign(units)
+        action = self.work_man.assign(units, self.expan_man.expansion)
         if action is not None:
             return action
 
