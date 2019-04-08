@@ -78,7 +78,7 @@ class ScoutManager(LowLevelModule):
                     self.do_scout = False
                 active_scout.has_ongoing_action = False
             else:
-                planned_action = get_raw_action_id(3674)("now", self.curr_target, [self.active_scout_tag])
+                planned_action = FUNCTIONS.Move_raw_pos("now", self.curr_target, [self.active_scout_tag])
 
         return planned_action
 

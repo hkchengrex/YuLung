@@ -3,6 +3,7 @@ from bot.util.unit_ids import *
 from pysc2.lib.raw_units import RawUnit
 
 from bot.util.unit_ids import *
+from bot.util.helper import *
 
 
 class Unit(RawUnit):
@@ -42,3 +43,10 @@ class Unit(RawUnit):
             self.action_detail = old_unit.action_detail
 
         return self
+
+    def __repr__(self):
+        return 'Unit(%s @ (%d,%d); Tag %d Health: %d Display: %d)' % (self.unit_type, self.posx, self.posy,
+                                               self.tag, self.health, self.display_type)
+
+    def __str__(self):
+        return self.__repr__()

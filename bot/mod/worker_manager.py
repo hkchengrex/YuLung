@@ -1,16 +1,14 @@
 import random
 
-from .low_level_module import LowLevelModule
-
-from bot.util.static_units import UNITS, UnitID
-from bot.util.unit_info import Attribute, Weapon, UnitType
-from bot.util.helper import *
-from bot.util import unit_info
-from bot.queries import *
-
 from pysc2.lib import actions
 from pysc2.lib import point
+
+from bot.util.helper import *
+from bot.util.unit_ids import *
+from .low_level_module import LowLevelModule
+
 FUNCTIONS = actions.FUNCTIONS
+
 
 class WorkerManager(LowLevelModule):
     def __init__(self, global_info):
@@ -23,13 +21,9 @@ class WorkerManager(LowLevelModule):
         self.bases = []
         self.drones = []
         self.drones_in_bases = []
-        '''self.drones_moved = []
-        self.harvest = False'''
         
     def track(self, units):
-        all_bases = get_all_owned(units, UNITS[UnitID.Hatchery]) \
-                 + get_all_owned(units, UNITS[UnitID.Lair]) \
-                 + get_all_owned(units, UNITS[UnitID.Hive])
+        all_bases = get_all_owned(units, ZERG_BASES)
         all_drones = get_all_owned(units, UNITS[UnitID.Drone])
         
         if len(self.bases) == 0 and len(self.drones) == 0:
@@ -41,7 +35,7 @@ class WorkerManager(LowLevelModule):
                 self.drones.append(drone)
                 self.drones_in_bases[0].append(drone)
             
-        untrack_bases = [b for b in all_bases if b not in self.bases]
+        untrack_bases = [b for b in all_bases if b not in self.bases and b.build_progress > 0.95]
         for untrack_b in untrack_bases:
             self.bases.append(untrack_b)
             self.drones_in_bases.append([])
@@ -56,50 +50,20 @@ class WorkerManager(LowLevelModule):
         
         dead_drones = [d for d in self.drones if d not in all_drones]
         for dead_d in dead_drones:
-            print("\nRemoving Dead Drones\n")
+            # print("\nRemoving Dead Drones\n")
             for drones_base_i in self.drones_in_bases:
                 if dead_d in drones_base_i:
                     drones_base_i.remove(dead_d)
             self.drones.remove(dead_d)
 
-        for i in range(len(self.bases)):
-            print("Drones in Base", i, ":", len(self.drones_in_bases[i]))
-        print("Total Drones", len(self.drones))
+        # for i in range(len(self.bases)):
+        #     print("Drones in Base", i, ":", len(self.drones_in_bases[i]))
+        # print("Total Drones", len(self.drones))
         
     def assign(self, units):
         
         planned_action = None
 
-        """
-        all_drones = get_all_owned(units, UNITS[UnitID.Drone])
-        for drone in all_drones:
-            if drone not in self.drones_moved:
-                base = self.bases[0]
-                base_pos = point.Point(base.posx-1000, base.posy-1000)
-                planned_action = get_raw_action_id(16)("now", base_pos, [drone.tag])
-                self.drones_moved.append(drone)
-                return planned_action
-        if len(self.drones_moved) >= 10 and self.harvest is False:
-            minerals = get_all_owned(units, UNITS[UnitID.MineralField])
-            m_pos = []
-            for m in minerals:
-                m_pos.append(point.Point(m.posx, m.posy))
-            
-            base = self.bases[0]
-            base_pos = point.Point(base.posx, base.posy)
-            mini = m_pos[0]
-            for pos in m_pos:
-                if base_pos.dist(pos) < base_pos.dist(mini):
-                    mini = pos
-            
-            drone = random.choice(all_drones)
-            planned_action = get_raw_action_id(3666)("now", mini, [drone.tag])
-            self.harvest = True
-            print("\n\nHarvest", mini, "\n\n")
-        """
-        all_bases = get_all_owned(units, UNITS[UnitID.Hatchery]) \
-                 + get_all_owned(units, UNITS[UnitID.Lair]) \
-                 + get_all_owned(units, UNITS[UnitID.Hive])
         all_drones = get_all_owned(units, UNITS[UnitID.Drone])
         max_worker = 16
         
@@ -123,12 +87,14 @@ class WorkerManager(LowLevelModule):
                             mini = pos
                     close_m = minerals[m_pos.index(mini)]                    
                     
-                    planned_action = get_raw_action_id(16)("now", mini, [selected_drone.tag])
+                    planned_action = FUNCTIONS.Harvest_Gather_raw_targeted("now", close_m.tag, [selected_drone.tag])
                     
                     self.drones_in_bases[base_index].append(selected_drone)
                     self.drones.append(selected_drone)
                     print("\nDrone Assigned to Base", base_index, "\n")
                     
                     return planned_action
+
+        return planned_action
         
 

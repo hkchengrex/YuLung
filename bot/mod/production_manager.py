@@ -7,6 +7,7 @@ from bot.queries import *
 from bot.util import grid_ordering
 from bot.util.helper import *
 from bot.util.unit_ids import *
+from bot.struct.unit_class import *
 from .low_level_module import LowLevelModule
 
 FUNCTIONS = actions.FUNCTIONS
@@ -61,7 +62,7 @@ class ProductionManager(LowLevelModule):
                         avail_abilities = query_available_abilities(self.sc2_env, selected_larva.tag)
                         if unit_type.ability_id in avail_abilities:
                             self.record_build(unit_type)
-                            planned_action = get_raw_action_id(unit_type.ability_id)("now", [selected_larva.tag])
+                            planned_action = get_raw_quick_action_id(unit_type.ability_id)("now", [selected_larva.tag])
                             return planned_action
                         else:
                             self.logger.log_game_verbose('Tried to morph: ' + unit_type.name + ' but we cannot.')
@@ -74,35 +75,45 @@ class ProductionManager(LowLevelModule):
                         # Pick drone
                         selected_drone = random.choice(usable_drones)
 
-                        # Pick location
-                        if pos is None:
-                            for _ in range(10):
-                                base_loc = random.choice(self.base_locations)
-                                ran_x = random.randint(-10, 11)*100 + base_loc.x
-                                ran_y = random.randint(-10, 11)*100 + base_loc.y
-                                build_pos = point.Point(ran_x, ran_y)
-                                result = query_building_placement(self.sc2_env, unit_type.ability_id, build_pos)
-                                if result == 1:
-                                    break
-                        else:
-                            # Try 11x11 shift, from center orderly
-                            for (i, j) in grid_ordering.order_5:
-                                build_pos = point.Point(pos.x+i*100+50, pos.y+j*100+50)
-                                result = query_building_placement(self.sc2_env, unit_type.ability_id, build_pos)
-                                if result == 1:
-                                    break
+                        if type(pos) != Unit:
+                            # Pick location
+                            if pos is None:
+                                for _ in range(10):
+                                    base_loc = random.choice(self.base_locations)
+                                    ran_x = random.randint(-10, 11)*100 + base_loc.x
+                                    ran_y = random.randint(-10, 11)*100 + base_loc.y
+                                    build_pos = point.Point(ran_x, ran_y)
+                                    result = query_building_placement(self.sc2_env, unit_type.ability_id, build_pos)
+                                    if result == 1:
+                                        break
+                            else:
+                                # Try 11x11 shift, from center orderly
+                                for (i, j) in grid_ordering.order_5:
+                                    build_pos = point.Point(pos.x+i*100+50, pos.y+j*100+50)
+                                    result = query_building_placement(self.sc2_env, unit_type.ability_id, build_pos)
+                                    if result == 1:
+                                        break
 
-                        # 1 = Success,
-                        # See https://github.com/Blizzard/s2client-proto/blob/master/s2clientprotocol/error.proto
-                        if result == 1:
+                            # 1 = Success,
+                            # See https://github.com/Blizzard/s2client-proto/blob/master/s2clientprotocol/error.proto
+                            if result == 1:
+                                self.record_build(unit_type)
+                                selected_drone.has_ongoing_action = True
+                                selected_drone.action_detail = pending
+                                planned_action = get_raw_pos_action_id(unit_type.ability_id)(
+                                    "now", build_pos, [selected_drone.tag])
+                                return planned_action
+                            else:
+                                print('Failed to build at ', str(build_pos))
+
+                        else:
+                            # Targeted build, like extractors
                             self.record_build(unit_type)
                             selected_drone.has_ongoing_action = True
                             selected_drone.action_detail = pending
-                            planned_action = get_raw_action_id(unit_type.ability_id)(
-                                "now", build_pos, [selected_drone.tag])
+                            planned_action = get_raw_targeted_action_id(unit_type.ability_id)(
+                                "now", pos.tag, [selected_drone.tag])
                             return planned_action
-                        else:
-                            print('Failed to build at ', str(build_pos))
 
                 else:
                     raise NotImplementedError

@@ -6,6 +6,7 @@ from bot.mod.global_info import GlobalInfo
 from bot.mod.production_manager import ProductionManager
 from bot.mod.scout_manager import ScoutManager
 from bot.util.helper import *
+from bot.util.static_units import *
 
 from bot.mod.worker_manager import WorkerManager
 
@@ -28,7 +29,7 @@ class Hypervisor:
 
         self.global_info.log_game_info("Hypervisor initialized.")
 
-        self.produ_man.build_asap(UNITS[UnitID.Overlord])
+        self.produ_man.build_asap(UNITS[UnitID.Overlord], 2)
 
     def process(self, obs):
         units, units_tag_dict = self.global_info.update(obs)
@@ -52,6 +53,8 @@ class Hypervisor:
                  + get_all(self.produ_man.all_built, UNITS[UnitID.Drone])
         pools = get_all(units, UNITS[UnitID.SpawningPool]) \
                 + get_all(self.produ_man.all_built, UNITS[UnitID.SpawningPool])
+        extractor = get_all(units, UNITS[UnitID.Extractor]) \
+                + get_all(self.produ_man.all_built, UNITS[UnitID.Extractor])
 
         # print(self.produ_man.all_built)
 
@@ -65,6 +68,8 @@ class Hypervisor:
                 self.produ_man.build_asap(UNITS[UnitID.Drone])
             elif len(pools) == 0:
                 self.produ_man.build_asap(UNITS[UnitID.SpawningPool])
+            elif len(extractor) == 0:
+                self.produ_man.build_asap(UNITS[UnitID.Extractor], self.expan_man.main_expansion().gases[0])
             else:
                 self.produ_man.build_asap(UNITS[UnitID.Zergling])
 
