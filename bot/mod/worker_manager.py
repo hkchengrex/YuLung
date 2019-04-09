@@ -77,14 +77,28 @@ class WorkerManager(LowLevelModule):
         untracked_drones = [d for d in all_drones if d not in self.tracked_drones]
         
         if len(untracked_drones) > 0:
+            
             for exp in expansions:
-                if exp.get_assigned_harvesters() < exp.get_ideal_harvesters():
+                if exp.get_assigned_harvesters() < exp.get_ideal_harvesters() or (exp.base.build_progress < 100 and len(exp.drones) < len(exp.minerals)*2):
                     selected_drone = random.choice(untracked_drones)
 
                     mineral = random.choice(exp.minerals)
                     mineral_pos = point.Point(mineral.posx, mineral.posy)
-                    
-                    planned_action = FUNCTIONS.Harvest_Gather_raw_targeted("now", mineral.tag, [selected_drone.tag])
+
+                    #Temporal Fix
+                    base_pos = point.Point(exp.base.posx, exp.base.posy)
+                    minerals = get_all(units, UNITS[UnitID.MineralField])
+                    m_pos = []
+                    for m in minerals:
+                        m_pos.append(point.Point(m.posx, m.posy))
+                    mini = m_pos[0]
+                    for pos in m_pos:
+                        if base_pos.dist(pos) < base_pos.dist(mini):
+                            mini = pos
+                    close_m = minerals[m_pos.index(mini)]
+
+                    planned_action = FUNCTIONS.Harvest_Gather_raw_targeted("now", close_m.tag, [selected_drone.tag])
+                    #planned_action = FUNCTIONS.Harvest_Gather_raw_targeted("now", mineral.tag, [selected_drone.tag])
                     #planned_action = FUNCTIONS.Move_raw_pos("now", mineral_pos, [selected_drone.tag])
                     
                     exp.drones.append(selected_drone)
