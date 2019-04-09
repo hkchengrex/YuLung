@@ -13,11 +13,7 @@ FUNCTIONS = actions.FUNCTIONS
 class WorkerManager(LowLevelModule):
     def __init__(self, global_info):
         super(WorkerManager, self).__init__(global_info)
-
-        """
-        drones stores all tracked drones
-        drones_in_bases stores list of drones in each base
-        """
+        
         self.tracked_drones = []
         
     def track(self, units, expansion):
@@ -31,29 +27,6 @@ class WorkerManager(LowLevelModule):
                 for drone in all_drones:
                     exp.drones.append(drone)
                     self.tracked_drones.append(drone)
-        """
-        if len(self.bases) == 0 and len(self.drones) == 0:
-            for base in all_bases:
-                self.bases.append(base)
-                
-            self.drones_in_bases.append([])
-            for drone in all_drones:
-                self.drones.append(drone)
-                self.drones_in_bases[0].append(drone)        
-            
-        untrack_bases = [b for b in all_bases if b not in self.bases and b.build_progress > 0.95]
-        for untrack_b in untrack_bases:
-            self.bases.append(untrack_b)
-            self.drones_in_bases.append([])
-                
-        dead_bases = [b for b in self.bases if b not in all_bases]
-        for dead_b in dead_bases:
-            dead_b_index = self.bases.index(dead_b)
-            for drone in self.drones_in_bases[dead_b_index]:
-                self.drones.remove(drone)
-            self.drones_in_bases.pop(dead_b_index)
-            self.bases.remove(dead_b)
-        """
         
         dead_drones = [d for d in self.tracked_drones if d not in all_drones]
         for dead_d in dead_drones:
@@ -62,10 +35,20 @@ class WorkerManager(LowLevelModule):
                 if dead_d in exp.drones:
                     exp.drones.remove(dead_d)
             self.tracked_drones.remove(dead_d)
-
+            
+        """
         for i in range(len(expansions)):
-            print("Drones in Base", i, ":", len(expansions[i].drones))
+            print("Drones in Base", i, ":", len(expansions[i].drones), expansions[i].get_assigned_harvesters(), expansions[i].get_ideal_harvesters())
         print("Total Drones", len(self.tracked_drones))
+        """
+
+    def get_deficiency(self, expansion):
+        deficient_exp = [exp for exp in expansion if exp.ownership == Alliance.Self and exp.get_assigned_harvesters() < exp.get_ideal_harvesters()]
+        deficiency = 0
+        for exp in deficient_exp:
+            deficiency += exp.get_ideal_harvesters() - exp.get_assigned_harvesters()
+        return deficiency
+        
         
     def assign(self, units, expansion):
         
@@ -73,41 +56,40 @@ class WorkerManager(LowLevelModule):
 
         all_drones = get_all_owned(units, UNITS[UnitID.Drone])
         expansions = [exp for exp in expansion if exp.ownership == Alliance.Self]
+
+        extractors = get_all(units, UNITS[UnitID.Extractor])
         
         untracked_drones = [d for d in all_drones if d not in self.tracked_drones]
         
         if len(untracked_drones) > 0:
-            
+            selected_drone = random.choice(untracked_drones)
             for exp in expansions:
-                if exp.get_assigned_harvesters() < exp.get_ideal_harvesters() or (exp.base.build_progress < 100 and len(exp.drones) < len(exp.minerals)*2):
-                    selected_drone = random.choice(untracked_drones)
+                
+                if len(extractors) > 0:
+                    for extract in extractors:
+                        if extract.build_progress == 100 and extract.assigned_harvesters < extract.ideal_harvesters:
+                            planned_action = FUNCTIONS.Harvest_Gather_raw_targeted("now", extract.tag, [selected_drone.tag])
+                            print("\nDrone Assigned to Extractor", extractors.index(extract), "\n")
 
-                    mineral = random.choice(exp.minerals)
-                    mineral_pos = point.Point(mineral.posx, mineral.posy)
-
-                    #Temporal Fix
+                            return planned_action
+                        
+                #Assign Worker to Mineral Field
+                if exp.get_assigned_harvesters() < exp.get_ideal_harvesters() or (exp.base.build_progress < 100 and len(exp.drones) < len(exp.minerals)*2):                    
                     base_pos = point.Point(exp.base.posx, exp.base.posy)
                     minerals = get_all(units, UNITS[UnitID.MineralField])
-                    m_pos = []
+                    closest_pos = point.Point(minerals[0].posx, minerals[0].posy)
+                    closest_m = minerals[0]
                     for m in minerals:
-                        m_pos.append(point.Point(m.posx, m.posy))
-                    mini = m_pos[0]
-                    for pos in m_pos:
-                        if base_pos.dist(pos) < base_pos.dist(mini):
-                            mini = pos
-                    close_m = minerals[m_pos.index(mini)]
+                        pos = point.Point(m.posx, m.posy)
+                        if base_pos.dist(pos) < base_pos.dist(closest_pos):
+                            closest_pos = pos
+                            closest_m = m
 
-                    planned_action = FUNCTIONS.Harvest_Gather_raw_targeted("now", close_m.tag, [selected_drone.tag])
-                    #planned_action = FUNCTIONS.Harvest_Gather_raw_targeted("now", mineral.tag, [selected_drone.tag])
-                    #planned_action = FUNCTIONS.Move_raw_pos("now", mineral_pos, [selected_drone.tag])
+                    planned_action = FUNCTIONS.Harvest_Gather_raw_targeted("now", closest_m.tag, [selected_drone.tag])
                     
                     exp.drones.append(selected_drone)
                     self.tracked_drones.append(selected_drone)
-                    print("")
                     print("\nDrone Assigned to Base", expansions.index(exp), "\n")
-                    print(exp.get_assigned_harvesters())
-                    print(exp.get_ideal_harvesters())                    
-                    print("")
                     
                     return planned_action
 

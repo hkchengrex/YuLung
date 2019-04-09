@@ -60,7 +60,6 @@ class Hypervisor:
                 + get_all(self.produ_man.all_built, UNITS[UnitID.Extractor])
 
         # print(self.produ_man.all_built)
-
         bases = get_all_owned(units, UNITS[UnitID.Hatchery]) \
                  + get_all_owned(units, UNITS[UnitID.Lair]) \
                  + get_all_owned(units, UNITS[UnitID.Hive])
