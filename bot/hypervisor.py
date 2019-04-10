@@ -84,8 +84,9 @@ class Hypervisor:
         action = self.comba_man.update(units)
         if action is not None:
             return action        
-        
-        action = self.work_man.assign(units, self.expan_man.expansion)
+
+        ratio = 1
+        action = self.work_man.assign(units, self.expan_man.expansion, ratio)
         if action is not None:
             return action
 
