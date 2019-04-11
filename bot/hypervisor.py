@@ -52,7 +52,7 @@ class Hypervisor:
 
         self.produ_man.set_base_locations([exp.pos for exp in self.expan_man.own_expansion() if exp.base is not None])
 
-        self.scout_man.set_scout_tar([exp.pos for exp in self.expan_man.expansion])
+        self.scout_man.set_scout_tar([exp.pos for exp in self.expan_man.neutral_expansion()])
 
         """
         Hardcoded simple rules here

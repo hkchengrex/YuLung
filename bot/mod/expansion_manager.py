@@ -284,3 +284,13 @@ class ExpansionManager(LowLevelModule):
                     planned_action = FUNCTIONS.Effect_InjectLarva_raw_targeted('now', exp.base.tag, exp.queen.tag)
                     return planned_action
 
+    def get_next_gas(self, units):
+        extrators = get_all_owned(units, UNITS[UnitID.Extractor])
+        gases = get_all(units, UNITS[UnitID.VespeneGeyser])
+        gases = [g for g in gases if g.display_type == 1 and not g.has_ongoing_action]
+
+        empty_gases = [
+            g for g in gases if
+                not any([ex.pos.dist(g.pos) < 100 for ex in extrators])
+        ]
+
