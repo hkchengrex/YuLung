@@ -29,13 +29,18 @@ class ProductionManager(LowLevelModule):
         self.base_locations = []  # type: List[point.Point]
 
         self.working_drone_list = []
+        # self.working_larva_list = []
         self.ongoing_construction = []
 
     def build_asap(self, unit_type: UnitType, pos=None, amount=1):
         self.units_pending.extend([{'type': unit_type, 'pos': pos}] * amount)
 
     def record_build(self, pending):
-        self.logger.log_game_info('Planning to build: ' + pending['type'].name)
+
+        if pending['type'] in ZERG_OVERSEER_LORD:
+            self.global_info.overlord_count += 1
+
+        self.logger.log_game_info('Planning to build: ' + pending['type'].name, False)
         self.units_pending.remove(pending)
         self.all_built.append(pending['type'])
 
@@ -47,7 +52,7 @@ class ProductionManager(LowLevelModule):
         planned_action = None
 
         drones = get_all_owned(units, UNITS[UnitID.Drone])
-        self.check_failed_construction(drones, units_tag_dict)
+        self.check_failed_construction(drones)
 
         for pending in self.units_pending:
             unit_type = pending['type']
@@ -55,15 +60,19 @@ class ProductionManager(LowLevelModule):
 
             if self.global_info.can_afford_unit(unit_type):
 
+                # usable_larvas = [d for d in larvas if not d.has_ongoing_action]
+                larvas = get_all_owned(units, UNITS[UnitID.Larva])
                 if unit_type in FROM_LARVA_TYPE:
                     # Pick a larva and build the unit required
-                    larvas = get_all_owned(units, UNITS[UnitID.Larva])
                     if len(larvas) > 0:
-                        selected_larva = random.choice(larvas)
+                        selected_larva = random.choice(larvas)  # type: Unit
 
                         avail_abilities = query_available_abilities(self.sc2_env, selected_larva.tag)
                         if unit_type.ability_id in avail_abilities:
                             self.record_build(pending)
+                            # selected_larva.has_ongoing_action = True
+                            # selected_larva.action_detail = pending
+                            # self.working_larva_list.append(selected_larva)
                             planned_action = get_raw_quick_action_id(unit_type.ability_id)("now", [selected_larva.tag])
                             return planned_action
                         else:
@@ -75,7 +84,7 @@ class ProductionManager(LowLevelModule):
 
                     if len(usable_drones) > 0:
                         # Pick drone
-                        selected_drone = random.choice(usable_drones)
+                        selected_drone = random.choice(usable_drones)  # type: Unit
 
                         if type(pos) != Unit:
                             # Pick location
@@ -125,12 +134,24 @@ class ProductionManager(LowLevelModule):
                     else:
                         print('No usable drones!')
 
+                elif unit_type == UNITS[UnitID.Queen]:
+                    bases = get_all_owned(units, ZERG_BASES)
+                    bases = [b for b in bases if b.order_len == 0]
+                    if len(bases) > 0:
+                        selected_base = random.choice(bases)
+                        avail_abilities = query_available_abilities(self.sc2_env, selected_base.tag)
+                        if unit_type.ability_id in avail_abilities:
+                            self.record_build(pending)
+                            planned_action = get_raw_quick_action_id(unit_type.ability_id)("now", [selected_base.tag])
+                            return planned_action
+                        else:
+                            self.logger.log_game_verbose('Tried to build: ' + unit_type.name + ' in base but we cannot.')
                 else:
                     raise NotImplementedError
 
         return planned_action
 
-    def check_failed_construction(self, drones, units_tag_dict: Dict[int, Unit]):
+    def check_failed_construction(self, drones):
         interrupted_drones = [d for d in drones if d.has_ongoing_action and d.order_len == 0]
 
         for d in interrupted_drones:
@@ -142,14 +163,37 @@ class ProductionManager(LowLevelModule):
 
     def update_ongoing_construction(self, units_tag_dict: Dict[int, Unit]):
         ongoing_construction = []
+
+        to_be_removed = []
         for d in self.working_drone_list:
-            d = units_tag_dict.get(d.tag)
-            if d is not None:
-                ongoing_construction.append(d.action_detail)
+            new_d = units_tag_dict.get(d.tag)
+            if new_d is not None:
+                ongoing_construction.append(new_d.action_detail)
+            else:
+                to_be_removed.append(d)
+
+        for d in to_be_removed:
+            self.working_drone_list.remove(d)
+
+        # for l in larva_list:
+        #     new_l = units_tag_dict.get(l.tag)
+        #     if new_l is not None:
+        #         print(new_l)
+        #         ongoing_construction.append(new_l.action_detail)
+        #     else:
+        #         self.working_larva_list.remove(l)
+
         self.ongoing_construction = ongoing_construction
 
     def get_count_ours_and_pending(self, units, unit_type):
         return len(get_all_owned(units, unit_type)) + len([
+            u for u in self.units_pending if u['type'] == unit_type
+        ]) + len([
+            u for u in self.ongoing_construction if u['type'] == unit_type
+        ])
+
+    def get_count_pending(self, units, unit_type):
+        return len([
             u for u in self.units_pending if u['type'] == unit_type
         ]) + len([
             u for u in self.ongoing_construction if u['type'] == unit_type

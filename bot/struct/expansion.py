@@ -27,6 +27,9 @@ class Expansion:
         self.base_queued = False
         self.is_main = False
 
+        self.queen = None
+        self.queen_queued = False
+
     def __str__(self):
         return 'Expansion at %s owned by %s' % (str(self.pos), str(self.ownership))
 
