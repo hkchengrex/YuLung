@@ -73,7 +73,6 @@ class Hypervisor:
         overlord_count = self.produ_man.get_count_ours_and_pending(units, UNITS[UnitID.Overlord])
 
         # print(self.produ_man.all_built)
-
         bases = get_all_owned(units, UNITS[UnitID.Hatchery]) \
                  + get_all_owned(units, UNITS[UnitID.Lair]) \
                  + get_all_owned(units, UNITS[UnitID.Hive])
@@ -94,7 +93,7 @@ class Hypervisor:
 
         if len(self.expan_man.enemy_expansion() > 0):
             self.comba_man.set_attack_tar(self.expan_man.enemy_expansion()[0].pos)
-        self.work_man.track(units)
+        self.work_man.track(units, self.expan_man.expansion)
         """
         End of hardcoded simple rules
         """
@@ -118,8 +117,9 @@ class Hypervisor:
         if action is not None:
             self.comba_usage += 1
             return action        
-        
-        action = self.work_man.assign(units)
+
+        ratio = 1
+        action = self.work_man.assign(units, self.expan_man.expansion, ratio)
         if action is not None:
             self.work_usage += 1
             return action

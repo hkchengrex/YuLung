@@ -14,11 +14,12 @@ class Expansion:
     - Ownership
     """
 
-    def __init__(self, pos, minerals, gases, ownership=Alliance.Neutral):
+    def __init__(self, pos, minerals, gases, drones, ownership=Alliance.Neutral):
         self.pos = pos
         self.minerals = minerals
         self.gases = gases
-
+        self.drones = drones
+        
         self.ownership = ownership
 
         self.extractor = []  # type: List[Unit]
