@@ -4,6 +4,9 @@ from bot.struct.expansion import *
 from bot.struct.unit_class import *
 from bot.util.helper import *
 from .low_level_module import LowLevelModule
+from bot.queries import *
+
+FUNCTIONS = actions.FUNCTIONS
 
 """
 Constants
@@ -161,6 +164,7 @@ class ExpansionManager(LowLevelModule):
         """
 
         hatchery_build_pos = []
+        queens_to_be_build = 0
 
         self.init_expansion(units)
 
@@ -200,10 +204,21 @@ class ExpansionManager(LowLevelModule):
                         exp.base_queued = False
 
                 if exp.base is not None:
+                    if exp.queen is None and self.global_info.has_pool:
+                        # The queen will inject me but not in this update function
+                        if exp.queen_queued:
+                            # Look for a queen
+                            queens = get_all_owned(units, UNITS[UnitID.Queen])
+                            queens = [q for q in queens if not q.has_ongoing_action]
+                            if len(queens) > 0:
+                                exp.queen = queens[0]
+                                exp.queen.has_ongoing_action = True
+                        else:
+                            exp.queen_queued = True
+                            queens_to_be_build += 1
+
                     # If we still have base there, we cannot lose it to the enemy
                     continue
-
-
 
             """
             This part deals with enemy's bases
@@ -237,7 +252,7 @@ class ExpansionManager(LowLevelModule):
                                               (exp.pos, exp.ownership, new_ownership), False)
                     exp.ownership = new_ownership
 
-        return hatchery_build_pos
+        return hatchery_build_pos, queens_to_be_build
 
     def get_next_expansion(self):
         """
@@ -261,7 +276,11 @@ class ExpansionManager(LowLevelModule):
 
         return min_total_idx
 
-
-
-
+    def queen_inject(self):
+        for exp in self.own_expansion():
+            if exp.base is not None and exp.queen is not None:
+                avail_abilities = query_available_abilities(self.sc2_env, exp.queen.tag)
+                if 251 in avail_abilities:
+                    planned_action = FUNCTIONS.Effect_InjectLarva_raw_targeted('now', exp.base.tag, exp.queen.tag)
+                    return planned_action
 

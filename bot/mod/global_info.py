@@ -23,6 +23,8 @@ class GlobalInfo(GameLogger):
         self.overlord_count = 1
         self.last_seen_overlords = []
 
+        self.has_pool = False
+
     def update(self, obs):
         self.consistent_units.update(obs.observation.raw_units)
         self.resources = player_to_resources(obs.observation.player)
@@ -34,6 +36,9 @@ class GlobalInfo(GameLogger):
             if units_tag_dict.get(o.tag) is None:
                 self.overlord_count -= 1  # One of them is dead
         self.last_seen_overlords = get_all_owned(units, ZERG_OVERSEER_LORD)
+
+        if not self.has_pool and len(get_all_owned(units, UNITS[UnitID.SpawningPool])) > 0:
+            self.has_pool = True
 
         return units, units_tag_dict
 

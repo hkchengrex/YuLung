@@ -134,6 +134,18 @@ class ProductionManager(LowLevelModule):
                     else:
                         print('No usable drones!')
 
+                elif unit_type == UNITS[UnitID.Queen]:
+                    bases = get_all_owned(units, ZERG_BASES)
+                    bases = [b for b in bases if b.order_len == 0]
+                    if len(bases) > 0:
+                        selected_base = random.choice(bases)
+                        avail_abilities = query_available_abilities(self.sc2_env, selected_base.tag)
+                        if unit_type.ability_id in avail_abilities:
+                            self.record_build(pending)
+                            planned_action = get_raw_quick_action_id(unit_type.ability_id)("now", [selected_base.tag])
+                            return planned_action
+                        else:
+                            self.logger.log_game_verbose('Tried to build: ' + unit_type.name + ' in base but we cannot.')
                 else:
                     raise NotImplementedError
 

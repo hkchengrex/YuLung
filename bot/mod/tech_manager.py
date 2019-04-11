@@ -42,8 +42,4 @@ class TechManager(LowLevelModule):
                 if prod_man.get_count_ours_and_pending(units, ZERG_TECH_BUILDINGS[i]) == 0:
                     to_be_built.append(ZERG_TECH_BUILDINGS[i])
 
-                    print(len(get_all_owned(units, ZERG_TECH_BUILDINGS[i])))
-                    print(len([u for u in prod_man.units_pending if u['type'] == ZERG_TECH_BUILDINGS[i]]))
-                    print(len([u for u in prod_man.ongoing_construction if u['type'] == ZERG_TECH_BUILDINGS[i]]))
-
         return to_be_built

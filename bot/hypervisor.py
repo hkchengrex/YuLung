@@ -38,14 +38,17 @@ class Hypervisor:
         self.comba_usage = 0
         self.scout_usage = 0
         self.work_usage = 0
+        self.queen_usage = 0
 
     def process(self, obs):
         units, units_tag_dict = self.global_info.update(obs)
 
-        hatchery_build_pos = self.expan_man.update_expansion(units, units_tag_dict)
+        hatchery_build_pos, queens_to_be_build = self.expan_man.update_expansion(units, units_tag_dict)
 
         for pos in hatchery_build_pos:
             self.produ_man.build_asap(UNITS[UnitID.Hatchery], pos)
+        if queens_to_be_build > 0:
+            self.produ_man.build_asap(UNITS[UnitID.Queen], amount=queens_to_be_build)
 
         self.produ_man.set_base_locations([exp.pos for exp in self.expan_man.own_expansion() if exp.base is not None])
 
@@ -100,8 +103,12 @@ class Hypervisor:
             print('Produ usage: %d' % self.produ_usage)
             print('Work  usage: %d' % self.work_usage)
             print('Scout usage: %d' % self.scout_usage)
-            print('Idle:        %d' % (self.iter-self.comba_usage-self.produ_usage-self.work_usage-self.scout_usage))
-            self.iter = self.comba_usage = self.produ_usage = self.work_usage = self.scout_usage = 0
+            print('Queen usage: %d' % self.scout_usage)
+            print('Idle:        %d' % (self.iter-self.comba_usage-self.produ_usage
+                                       -self.work_usage-self.scout_usage-self.queen_usage))
+
+            self.iter = self.comba_usage = self.produ_usage \
+                = self.work_usage = self.scout_usage = self.queen_usage = 0
 
         # Define priorities here. TODO: Might need to give priorities dynamically
         action = self.comba_man.update(units)
@@ -124,5 +131,11 @@ class Hypervisor:
         if action is not None:
             self.scout_usage += 1
             return action
+
+        if self.iter % 5 == 0:
+            action = self.expan_man.queen_inject()
+            if action is not None:
+                self.queen_usage += 1
+                return action
 
         return None
