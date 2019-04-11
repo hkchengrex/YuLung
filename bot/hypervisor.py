@@ -5,6 +5,7 @@ from bot.mod.expansion_manager import ExpansionManager
 from bot.mod.global_info import GlobalInfo
 from bot.mod.production_manager import ProductionManager
 from bot.mod.scout_manager import ScoutManager
+from bot.mod.tech_manager import TechManager
 from bot.util.helper import *
 from bot.util.static_units import *
 
@@ -26,10 +27,17 @@ class Hypervisor:
         self.scout_man = ScoutManager(self.global_info)
         self.scout_man.go_scout_once()
         self.work_man = WorkerManager(self.global_info)
+        self.tech_man = TechManager(self.global_info)
 
         self.global_info.log_game_info("Hypervisor initialized.")
 
-        self.produ_man.build_asap(UNITS[UnitID.Overlord], 2)
+        self.produ_man.build_asap(UNITS[UnitID.Overlord])
+
+        self.iter = 0
+        self.produ_usage = 0
+        self.comba_usage = 0
+        self.scout_usage = 0
+        self.work_usage = 0
 
     def process(self, obs):
         units, units_tag_dict = self.global_info.update(obs)
@@ -46,18 +54,13 @@ class Hypervisor:
         """
         Hardcoded simple rules here
         """
-        for i, ex in enumerate(self.expan_man.main_expansion().extractor):
-            print('Extractor %d, drone: %d/%d' % (i, ex.assigned_harvesters, ex.ideal_harvesters))
-
         if len(self.expan_man.own_expansion()) < 2:
             self.expan_man.claim_expansion(self.expan_man.get_next_expansion())
 
-        drones = get_all(units, UNITS[UnitID.Drone]) \
-                 + get_all(self.produ_man.all_built, UNITS[UnitID.Drone])
-        pools = get_all(units, UNITS[UnitID.SpawningPool]) \
-                + get_all(self.produ_man.all_built, UNITS[UnitID.SpawningPool])
-        extractor = get_all(units, UNITS[UnitID.Extractor]) \
-                + get_all(self.produ_man.all_built, UNITS[UnitID.Extractor])
+        drones_count = self.produ_man.get_count_ours_and_pending(units, UNITS[UnitID.Drone])
+        pools_count = self.produ_man.get_count_ours_and_pending(units, UNITS[UnitID.SpawningPool])
+        extractor_count = self.produ_man.get_count_ours_and_pending(units, UNITS[UnitID.Extractor])
+        overlord_count = self.produ_man.get_count_ours_and_pending(units, UNITS[UnitID.Overlord])
 
         # print(self.produ_man.all_built)
         bases = get_all_owned(units, UNITS[UnitID.Hatchery]) \
@@ -65,37 +68,60 @@ class Hypervisor:
                  + get_all_owned(units, UNITS[UnitID.Hive])
         max_drones = len(bases) * 16
 
-        if len(drones) < max_drones:
-            self.produ_man.build_asap(UNITS[UnitID.Drone])
-        elif len(pools) == 0:
-            self.produ_man.build_asap(UNITS[UnitID.SpawningPool])
-        elif len(extractor) == 0:
-            self.produ_man.build_asap(UNITS[UnitID.Extractor], self.expan_man.main_expansion().gases[0])
-        elif len(self.produ_man.units_pending) == 0:
-            self.produ_man.build_asap(UNITS[UnitID.Zergling])
+        if self.global_info.resources.food_used + 2 > overlord_count*8:
+            self.produ_man.build_asap(UNITS[UnitID.Overlord])
 
-        self.comba_man.set_attack_tar(self.expan_man.enemy_expansion()[0].pos)
+        if len(self.produ_man.units_pending) == 0:
+            if drones_count < max_drones:
+                self.produ_man.build_asap(UNITS[UnitID.Drone])
+            elif pools_count == 0:
+                self.tech_man.enable_tech(UNITS[UnitID.SpawningPool].unit_id)
+            elif extractor_count == 0:
+                self.produ_man.build_asap(UNITS[UnitID.Extractor], self.expan_man.main_expansion().gases[0])
+            else:
+                self.produ_man.build_asap(UNITS[UnitID.Zergling])
+
+        if len(self.expan_man.enemy_expansion()) > 0:
+            self.comba_man.set_attack_tar(self.expan_man.enemy_expansion()[0].pos)
         self.work_man.track(units, self.expan_man.expansion)
         """
         End of hardcoded simple rules
         """
 
+        # Update tech requirement
+        tech_to_be_built = self.tech_man.update(units, self.produ_man)
+        for t in tech_to_be_built:
+            self.produ_man.build_asap(t)
+
+        self.iter += 1
+        if self.iter % 100 == 0:
+            print('Comba usage: %d' % self.comba_usage)
+            print('Produ usage: %d' % self.produ_usage)
+            print('Work  usage: %d' % self.work_usage)
+            print('Scout usage: %d' % self.scout_usage)
+            print('Idle:        %d' % (self.iter-self.comba_usage-self.produ_usage-self.work_usage-self.scout_usage))
+            self.iter = self.comba_usage = self.produ_usage = self.work_usage = self.scout_usage = 0
+
         # Define priorities here. TODO: Might need to give priorities dynamically
         action = self.comba_man.update(units)
         if action is not None:
+            self.comba_usage += 1
             return action        
 
         ratio = 1
         action = self.work_man.assign(units, self.expan_man.expansion, ratio)
         if action is not None:
+            self.work_usage += 1
             return action
 
         action = self.produ_man.update(units, units_tag_dict)
         if action is not None:
+            self.produ_usage += 1
             return action
 
         action = self.scout_man.update(units, units_tag_dict)
         if action is not None:
+            self.scout_usage += 1
             return action
 
         return None

@@ -18,7 +18,6 @@ class WorkerManager(LowLevelModule):
         self.drones_on_gas = []
         
     def track(self, units, expansion):
-        all_bases = get_all_owned(units, ZERG_BASES)
         all_drones = get_all_owned(units, UNITS[UnitID.Drone])
 
         expansions = [exp for exp in expansion if exp.ownership == Alliance.Self]
@@ -33,7 +32,7 @@ class WorkerManager(LowLevelModule):
         for dead_d in dead_drones:
             for exp in expansions:
                 if dead_d in exp.drones:
-                    print("\nRemoving Dead Mineral Drones\n")
+                    # print("\nRemoving Dead Mineral Drones\n")
                     exp.drones.remove(dead_d)
             self.tracked_drones.remove(dead_d)
             
@@ -105,7 +104,7 @@ class WorkerManager(LowLevelModule):
                         
                         planned_action = FUNCTIONS.Harvest_Gather_raw_targeted("now", extract.tag, [selected_drone.tag])
                         self.drones_on_gas.append(selected_drone)
-                        print("\nDrone assigned to Extractor", extractors.index(extract), "\n")
+                        # print("\nDrone assigned to Extractor", extractors.index(extract), "\n")
                         
                         return planned_action
         
@@ -145,7 +144,7 @@ class WorkerManager(LowLevelModule):
                     
                         exp.drones.append(selected_drone)
                         self.tracked_drones.append(selected_drone)
-                        print("\nDrone Assigned to Base", expansions.index(exp), "\n")
+                        # print("\nDrone Assigned to Base", expansions.index(exp), "\n")
                     
                         return planned_action
                 
