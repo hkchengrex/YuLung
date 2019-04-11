@@ -46,6 +46,9 @@ class Hypervisor:
         """
         Hardcoded simple rules here
         """
+        for i, ex in enumerate(self.expan_man.main_expansion().extractor):
+            print('Extractor %d, drone: %d/%d' % (i, ex.assigned_harvesters, ex.ideal_harvesters))
+
         if len(self.expan_man.own_expansion()) < 2:
             self.expan_man.claim_expansion(self.expan_man.get_next_expansion())
 
@@ -63,15 +66,14 @@ class Hypervisor:
                  + get_all_owned(units, UNITS[UnitID.Hive])
         max_drones = len(bases) * 16
 
-        if len(self.produ_man.units_pending) == 0:
-            if len(drones) < max_drones:
-                self.produ_man.build_asap(UNITS[UnitID.Drone])
-            elif len(pools) == 0:
-                self.produ_man.build_asap(UNITS[UnitID.SpawningPool])
-            elif len(extractor) == 0:
-                self.produ_man.build_asap(UNITS[UnitID.Extractor], self.expan_man.main_expansion().gases[0])
-            else:
-                self.produ_man.build_asap(UNITS[UnitID.Zergling])
+        if len(drones) < max_drones:
+            self.produ_man.build_asap(UNITS[UnitID.Drone])
+        elif len(pools) == 0:
+            self.produ_man.build_asap(UNITS[UnitID.SpawningPool])
+        elif len(extractor) == 0:
+            self.produ_man.build_asap(UNITS[UnitID.Extractor], self.expan_man.main_expansion().gases[0])
+        elif len(self.produ_man.units_pending) == 0:
+            self.produ_man.build_asap(UNITS[UnitID.Zergling])
 
         self.comba_man.set_attack_tar(self.expan_man.enemy_expansion()[0].pos)
         self.work_man.track(units)

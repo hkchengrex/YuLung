@@ -71,7 +71,7 @@ class ProductionManager(LowLevelModule):
                     # Don't take the drones that have missions
                     usable_drones = [d for d in drones if not d.has_ongoing_action]
 
-                    if len(drones) > 0:
+                    if len(usable_drones) > 0:
                         # Pick drone
                         selected_drone = random.choice(usable_drones)
 

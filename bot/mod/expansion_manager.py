@@ -164,6 +164,7 @@ class ExpansionManager(LowLevelModule):
         self.init_expansion(units)
 
         enemy_buildings = get_all_enemy(units, ALL_BUILDING_ID)
+        extractors = get_all_owned(units, UNITS[UnitID.Extractor])
 
         # First, refresh the list of expansions
         for exp in self.expansion:
@@ -187,6 +188,11 @@ class ExpansionManager(LowLevelModule):
                 # Assign hatchery
                 our_bases = get_all_owned(units, ZERG_BASES)
 
+                # Assign extractors
+                exp.extractor = [
+                    e for e in extractors if e.pos.dist(exp.pos) < RESOURCE_SPREAD_THRESHOLD
+                ]
+
                 for b in our_bases:
                     if b.pos.dist(exp.pos) < BASE_TO_EXPANSION_THRESHOLD:
                         exp.base = b
@@ -195,6 +201,8 @@ class ExpansionManager(LowLevelModule):
                 if exp.base is not None:
                     # If we still have base there, we cannot lose it to the enemy
                     continue
+
+
 
             """
             This part deals with enemy's bases
