@@ -60,16 +60,17 @@ class Hypervisor:
         drones_count = self.produ_man.get_count_ours_and_pending(units, UNITS[UnitID.Drone])
         pools_count = self.produ_man.get_count_ours_and_pending(units, UNITS[UnitID.SpawningPool])
         extractor_count = self.produ_man.get_count_ours_and_pending(units, UNITS[UnitID.Extractor])
-        overlord_count = self.produ_man.get_count_ours_and_pending(units, UNITS[UnitID.Overlord])
+        overlord_count = self.produ_man.get_count_pending(units, UNITS[UnitID.Overlord]) \
+                         + self.global_info.overlord_count
 
-        # print(self.produ_man.all_built)
         bases = get_all_owned(units, UNITS[UnitID.Hatchery]) \
                  + get_all_owned(units, UNITS[UnitID.Lair]) \
                  + get_all_owned(units, UNITS[UnitID.Hive])
         max_drones = len(bases) * 16
 
-        if self.global_info.resources.food_used + 2 > overlord_count*8:
+        if self.global_info.resources.food_used + 4 > overlord_count*8 + len(bases)*6:
             self.produ_man.build_asap(UNITS[UnitID.Overlord])
+            self.global_info.log_game_info('Building overlord under pressure')
 
         if len(self.produ_man.units_pending) == 0:
             if drones_count < max_drones:

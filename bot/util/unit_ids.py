@@ -55,6 +55,11 @@ ZERG_BASES = [
     UNITS[UnitID.Hive],
 ]
 
+ZERG_OVERSEER_LORD = [
+    UNITS[UnitID.Overlord],
+    UNITS[UnitID.Overseer],
+]
+
 TERRAN_BASES = [
     UNITS[UnitID.OrbitalCommand],
     UNITS[UnitID.CommandCenter],

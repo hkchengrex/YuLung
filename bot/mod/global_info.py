@@ -4,6 +4,8 @@ from bot.struct.resources import Resources, player_to_resources
 from bot.util.consistent_units import ConsistentUnits
 from bot.util.game_logger import GameLogger
 from bot.util.unit_info import UnitType
+from bot.util.helper import *
+from bot.util.unit_ids import *
 
 
 class GlobalInfo(GameLogger):
@@ -18,16 +20,31 @@ class GlobalInfo(GameLogger):
         self.consistent_units = ConsistentUnits()
         self.home_pos = None
 
+        self.overlord_count = 1
+        self.last_seen_overlords = []
+
     def update(self, obs):
         self.consistent_units.update(obs.observation.raw_units)
         self.resources = player_to_resources(obs.observation.player)
 
-        return self.consistent_units.units, self.consistent_units.units_tag_dict
+        units = self.consistent_units.units
+        units_tag_dict = self.consistent_units.units_tag_dict
+
+        for o in self.last_seen_overlords:
+            if units_tag_dict.get(o.tag) is None:
+                self.overlord_count -= 1  # One of them is dead
+        self.last_seen_overlords = get_all_owned(units, ZERG_OVERSEER_LORD)
+
+        return units, units_tag_dict
 
     def avail_food(self):
         return self.resources.food_cap - self.resources.food_used
 
     def can_afford_unit(self, unit: UnitType):
-        return (self.resources.mineral >= unit.mineral_cost
-                and self.resources.vespene >= unit.vespene_cost
-                and self.avail_food() >= unit.food_required)
+        if unit.food_required == 0:
+            return (self.resources.mineral >= unit.mineral_cost
+                    and self.resources.vespene >= unit.vespene_cost)
+        else:
+            return (self.resources.mineral >= unit.mineral_cost
+                    and self.resources.vespene >= unit.vespene_cost
+                    and self.avail_food() >= unit.food_required)
