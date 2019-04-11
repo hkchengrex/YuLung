@@ -12,6 +12,10 @@ class YuLungAgent(base_agent.BaseAgent):
     The top level of decision making.
     """
 
+    def __init__(self, sc2_env):
+        super().__init__(sc2_env)
+        self.action = None
+
     def reset(self):
         super(YuLungAgent, self).reset()
 
@@ -21,7 +25,7 @@ class YuLungAgent(base_agent.BaseAgent):
         super(YuLungAgent, self).step(obs)
 
         try:
-            action = self.hypervisor.process(obs)
+            action = self.hypervisor.process(self.action, obs)
         except pysc2.lib.protocol.ProtocolError as e:
             action = None
             print('Protocol exception caught in base agent', e)
@@ -30,3 +34,6 @@ class YuLungAgent(base_agent.BaseAgent):
             return action
 
         return FUNCTIONS.no_op()
+
+    def set_action(self, action):
+        self.action = action
