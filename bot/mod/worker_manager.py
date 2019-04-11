@@ -83,7 +83,7 @@ class WorkerManager(LowLevelModule):
     def assign_gas(self, units, expansions, untracked_drones, ratio):
         planned_action = None
 
-        extractors = [ext for ext in get_all_owned(units, UNITS[UnitID.Extractor]) if ext.build_progress == 100]        
+        extractors = [ext for ext in get_all_owned(units, UNITS[UnitID.Extractor]) if ext.build_progress == 100]
         ideal_num_on_gas = round(ratio * self.get_gas_slots(units))
         #print("\nDrones on gas:", len(self.drones_on_gas), "Ideal:", ideal_num_on_gas, "\n")
 
@@ -97,21 +97,15 @@ class WorkerManager(LowLevelModule):
                             self.tracked_drones.append(selected_drone)
                         #Use Mineral Drones
                         else:
-                            extract_pos = point.Point(extract.posx, extract.posy)
-                            closest_pos = point.Point(999999, 999999)
-                            closest_exp = None
                             for exp in expansions:
-                                if exp.base is not None:
-                                    pos = point.Point(exp.base.posx, exp.base.posy)
-                                    if extract_pos.dist(pos) < extract_pos.dist(closest_pos):
-                                        closest_pos = pos
-                                        closest_exp = exp
-                            selected_drone = random.choice(closest_exp.drones)
-                            closest_exp.drones.remove(selected_drone)
+                                if extract in exp.extractor:
+                                    selected_drone = random.choice(exp.drones)
+                                    exp.drones.remove(selected_drone)
+                                    break
                         
                         planned_action = FUNCTIONS.Harvest_Gather_raw_targeted("now", extract.tag, [selected_drone.tag])
                         self.drones_on_gas.append(selected_drone)
-                        print("\nDrone from Base", expansions.index(closest_exp), "assigned to Extractor", extractors.index(extract), "\n")
+                        print("\nDrone assigned to Extractor", extractors.index(extract), "\n")
                         
                         return planned_action
         
