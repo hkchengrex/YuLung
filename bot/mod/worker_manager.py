@@ -29,16 +29,13 @@ class WorkerManager(LowLevelModule):
                     exp.drones.append(drone)
                     self.tracked_drones.append(drone)
         
-        dead_drones = [d for d in self.tracked_drones if d not in all_drones]
-        for dead_d in dead_drones:            
+        dead_drones = [d for d in self.tracked_drones if d not in all_drones and d not in self.drones_on_gas]
+        for dead_d in dead_drones:
             for exp in expansions:
                 if dead_d in exp.drones:
                     print("\nRemoving Dead Mineral Drones\n")
                     exp.drones.remove(dead_d)
             self.tracked_drones.remove(dead_d)
-            if dead_d in self.drones_on_gas:
-                print("\nRemoving Dead Gas Drones\n")
-                self.drones_on_gas.remove(dead_d)
             
         """
         for i in range(len(expansions)):
@@ -63,7 +60,8 @@ class WorkerManager(LowLevelModule):
         return deficiency
         """
         return self.get_gas_slots(units) - len(self.drones_on_gas)
-    
+    
+
     def get_gas_slots(self, units):
         extractors = get_all_owned(units, UNITS[UnitID.Extractor])
         gas_slots = 0
@@ -156,7 +154,8 @@ class WorkerManager(LowLevelModule):
                         print("\nDrone Assigned to Base", expansions.index(exp), "\n")
                     
                         return planned_action
-                
+                
+
         return planned_action
         
 
