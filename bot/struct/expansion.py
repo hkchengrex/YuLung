@@ -21,7 +21,8 @@ class Expansion:
 
         self.ownership = ownership
 
-        self.base = None  # Unit referring to hatchery/lair/hive
+        self.extractor = []  # type: List[Unit]
+        self.base = None   # type: Unit # Unit referring to hatchery/lair/hive
         self.base_queued = False
         self.is_main = False
 
