@@ -60,7 +60,6 @@ class Hypervisor:
                 + get_all(self.produ_man.all_built, UNITS[UnitID.Extractor])
 
         # print(self.produ_man.all_built)
-
         bases = get_all_owned(units, UNITS[UnitID.Hatchery]) \
                  + get_all_owned(units, UNITS[UnitID.Lair]) \
                  + get_all_owned(units, UNITS[UnitID.Hive])
@@ -76,7 +75,7 @@ class Hypervisor:
             self.produ_man.build_asap(UNITS[UnitID.Zergling])
 
         self.comba_man.set_attack_tar(self.expan_man.enemy_expansion()[0].pos)
-        self.work_man.track(units)
+        self.work_man.track(units, self.expan_man.expansion)
         """
         End of hardcoded simple rules
         """
@@ -85,8 +84,9 @@ class Hypervisor:
         action = self.comba_man.update(units)
         if action is not None:
             return action        
-        
-        action = self.work_man.assign(units)
+
+        ratio = 1
+        action = self.work_man.assign(units, self.expan_man.expansion, ratio)
         if action is not None:
             return action
 
