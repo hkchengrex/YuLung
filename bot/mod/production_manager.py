@@ -40,7 +40,7 @@ class ProductionManager(LowLevelModule):
         if pending['type'] in ZERG_OVERSEER_LORD:
             self.global_info.overlord_count += 1
 
-        self.logger.log_game_info('Planning to build: ' + pending['type'].name)
+        self.logger.log_game_info('Planning to build: ' + pending['type'].name, False)
         self.units_pending.remove(pending)
         self.all_built.append(pending['type'])
 

@@ -73,7 +73,7 @@ class Hypervisor:
 
         if self.global_info.resources.food_used + 4 > overlord_count*8 + len(bases)*6:
             self.produ_man.build_asap(UNITS[UnitID.Overlord])
-            self.global_info.log_game_info('Building overlord under pressure')
+            self.global_info.log_game_info('Building overlord under pressure', False)
 
         if len(self.produ_man.units_pending) == 0:
             if drones_count < max_drones:
