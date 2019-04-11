@@ -34,10 +34,10 @@ class ProductionManager(LowLevelModule):
     def build_asap(self, unit_type: UnitType, pos=None, amount=1):
         self.units_pending.extend([{'type': unit_type, 'pos': pos}] * amount)
 
-    def record_build(self, type):
-        self.logger.log_game_info('Planning to build: ' + type.name)
-        self.units_pending = self.units_pending[1:]
-        self.all_built.append(type)
+    def record_build(self, pending):
+        self.logger.log_game_info('Planning to build: ' + pending['type'].name)
+        self.units_pending.remove(pending)
+        self.all_built.append(pending['type'])
 
     def set_base_locations(self, base_locations: List[point.Point]):
         self.base_locations = base_locations  # type: List[point.Point]
@@ -63,7 +63,7 @@ class ProductionManager(LowLevelModule):
 
                         avail_abilities = query_available_abilities(self.sc2_env, selected_larva.tag)
                         if unit_type.ability_id in avail_abilities:
-                            self.record_build(unit_type)
+                            self.record_build(pending)
                             planned_action = get_raw_quick_action_id(unit_type.ability_id)("now", [selected_larva.tag])
                             return planned_action
                         else:
@@ -81,6 +81,8 @@ class ProductionManager(LowLevelModule):
                             # Pick location
                             if pos is None:
                                 for _ in range(10):
+                                    if len(self.base_locations) == 0:
+                                        return
                                     base_loc = random.choice(self.base_locations)
                                     ran_x = random.randint(-10, 11)*100 + base_loc.x
                                     ran_y = random.randint(-10, 11)*100 + base_loc.y
@@ -99,7 +101,7 @@ class ProductionManager(LowLevelModule):
                             # 1 = Success,
                             # See https://github.com/Blizzard/s2client-proto/blob/master/s2clientprotocol/error.proto
                             if result == 1:
-                                self.record_build(unit_type)
+                                self.record_build(pending)
                                 selected_drone.has_ongoing_action = True
                                 selected_drone.action_detail = pending
                                 self.working_drone_list.append(selected_drone)
@@ -112,7 +114,7 @@ class ProductionManager(LowLevelModule):
 
                         else:
                             # Targeted build, like extractors
-                            self.record_build(unit_type)
+                            self.record_build(pending)
                             selected_drone.has_ongoing_action = True
                             selected_drone.action_detail = pending
                             self.working_drone_list.append(selected_drone)

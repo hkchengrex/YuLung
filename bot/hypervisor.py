@@ -54,18 +54,8 @@ class Hypervisor:
         """
         Hardcoded simple rules here
         """
-        # for i, ex in enumerate(self.expan_man.main_expansion().extractor):
-        #     print('Extractor %d, drone: %d/%d' % (i, ex.assigned_harvesters, ex.ideal_harvesters))
-
         if len(self.expan_man.own_expansion()) < 2:
             self.expan_man.claim_expansion(self.expan_man.get_next_expansion())
-
-        # drones = get_all(units, UNITS[UnitID.Drone]) \
-        #          + get_all(self.produ_man.all_built, UNITS[UnitID.Drone])
-        # pools = get_all(units, UNITS[UnitID.SpawningPool]) \
-        #         + get_all(self.produ_man.all_built, UNITS[UnitID.SpawningPool])
-        # extractor = get_all(units, UNITS[UnitID.Extractor]) \
-        #         + get_all(self.produ_man.all_built, UNITS[UnitID.Extractor])
 
         drones_count = self.produ_man.get_count_ours_and_pending(units, UNITS[UnitID.Drone])
         pools_count = self.produ_man.get_count_ours_and_pending(units, UNITS[UnitID.SpawningPool])
@@ -91,7 +81,7 @@ class Hypervisor:
             else:
                 self.produ_man.build_asap(UNITS[UnitID.Zergling])
 
-        if len(self.expan_man.enemy_expansion() > 0):
+        if len(self.expan_man.enemy_expansion()) > 0:
             self.comba_man.set_attack_tar(self.expan_man.enemy_expansion()[0].pos)
         self.work_man.track(units, self.expan_man.expansion)
         """
@@ -133,7 +123,5 @@ class Hypervisor:
         if action is not None:
             self.scout_usage += 1
             return action
-
-        # print(self.produ_man.units_pending, self.produ_man.ongoing_construction, self.produ_man.working_drone_list)
 
         return None
