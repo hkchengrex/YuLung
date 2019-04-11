@@ -219,9 +219,15 @@ class ExpansionManager(LowLevelModule):
             new_ownership = None
             if belong_to_enemy:
                 new_ownership = Alliance.Enemy
-            elif exp.ownership == Alliance.Enemy and not exp.is_main:
-                # Cannot convert enemy's main to neutral easily
-                new_ownership = Alliance.Neutral
+            elif exp.ownership == Alliance.Enemy:
+                if exp.is_main:
+                    # Cannot convert enemy's main to neutral easily
+                    # we need a nearby unit, otherwise we would convert it to neutral at first game step
+                    for u in [u for u in units if u.alliance==Alliance.Self]:
+                        if u.pos.dist(exp.pos) < 500:
+                            new_ownership = Alliance.Neutral
+                else:
+                    new_ownership = Alliance.Neutral
 
             # Update base ownership
             if new_ownership is not None:

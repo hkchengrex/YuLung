@@ -127,6 +127,21 @@ TECH_BUILDING_TYPE = [
     UNITS[UnitID.GreaterSpire],
 ]
 
+ZERG_TECH_BUILDINGS = [
+    UNITS[UnitID.SpawningPool],
+    UNITS[UnitID.RoachWarren],
+    UNITS[UnitID.BanelingNest],
+    UNITS[UnitID.Lair],
+    UNITS[UnitID.HydraliskDen],
+    UNITS[UnitID.LurkerDenMP],
+    UNITS[UnitID.InfestationPit],
+    UNITS[UnitID.Spire],
+    UNITS[UnitID.NydusNetwork],
+    UNITS[UnitID.Hive],
+    UNITS[UnitID.UltraliskCavern],
+    UNITS[UnitID.GreaterSpire],
+]
+
 # These units are considered strong invisible units that need countering
 STRONG_CLOAK_TYPE = [
     UNITS[UnitID.Ghost],
