@@ -84,12 +84,12 @@ class Hypervisor:
                 if self.expan_man.main_expansion() is not None:
                     next_gas = self.expan_man.get_next_gas(units)
                     if next_gas is not None:
-                        self.produ_man.build_asap(UNITS[UnitID.Extractor], self.expan_man.get_next_gas(units))
+                        self.produ_man.build_asap(UNITS[UnitID.Extractor], next_gas)
             elif extractor_count == 1:
                 if self.expan_man.main_expansion() is not None:
                     next_gas = self.expan_man.get_next_gas(units)
                     if next_gas is not None:
-                        self.produ_man.build_asap(UNITS[UnitID.Extractor], self.expan_man.get_next_gas(units))
+                        self.produ_man.build_asap(UNITS[UnitID.Extractor], next_gas)
             else:
                 self.produ_man.build_asap(UNITS[UnitID.Zergling])
 

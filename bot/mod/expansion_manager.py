@@ -297,15 +297,14 @@ class ExpansionManager(LowLevelModule):
 
         extractors = get_all_owned(units, UNITS[UnitID.Extractor])
 
-        gases = get_all(units, UNITS[UnitID.VespeneGeyser])
+        gases = get_all(units, GAS_UNIT_ID)
         gases = [g for g in gases if g.display_type == 1 and not g.has_ongoing_action]
+        # gases = [g for g in gases]
 
         empty_gases = [
             g for g in gases if
             not any([ex.pos.dist(g.pos) < 100 for ex in extractors])
         ]
-
-        print(empty_gases)
 
         for g in empty_gases:
             if g.pos.dist(self.main_expansion().pos) < BUILDING_TO_EXPANSION_THRESHOLD:

@@ -131,7 +131,7 @@ class WorkerManager(LowLevelModule):
                     if exp.get_assigned_harvesters() < exp.get_ideal_harvesters() or \
                        (exp.base.build_progress < 100 and len(exp.drones) < len(exp.minerals)*2):
                         base_pos = point.Point(exp.base.posx, exp.base.posy)
-                        minerals = get_all(units, UNITS[UnitID.MineralField])
+                        minerals = get_all(units, MINERAL_UNIT_ID)
                         closest_pos = point.Point(minerals[0].posx, minerals[0].posy)
                         closest_m = minerals[0]
                         for m in minerals:

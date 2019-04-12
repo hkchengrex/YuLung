@@ -8,6 +8,11 @@ Running the actual bot:
 
 `python -m pysc2.bin.agent --map Simple64 --agent bot.agent.YuLungAgent --agent_race zerg`
 
+More complex case:
+
+`python -m pysc2.bin.agent --map "Abiogenesis" --agent bot.agent.YuLungAgent --agent_race zerg --feature_screen_size 128 --feature_minimap_size 2 --camera_width 140
+`
+
 Running the test bot: 
 
 `python -m pysc2.bin.agent --map CollectMineralShards --agent bot.sample_agent.CollectMineralShards`

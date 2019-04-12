@@ -12,13 +12,23 @@ class YuLungAgent(base_agent.BaseAgent):
     The top level of decision making.
     """
 
+    def __init__(self, env):
+        super().__init__(env)
+        self.camera_moved = False
+        self.hypervisor = None
+
     def reset(self):
         super(YuLungAgent, self).reset()
 
         self.hypervisor = Hypervisor(self.sc2_env)
+        self.camera_moved = False
 
     def step(self, obs):
         super(YuLungAgent, self).step(obs)
+
+        if not self.camera_moved:
+            self.camera_moved = True
+            return FUNCTIONS.move_camera([11, 13])
 
         try:
             action = self.hypervisor.process(obs)
