@@ -5,6 +5,7 @@ from bot.struct.unit_class import *
 from bot.util.helper import *
 from .low_level_module import LowLevelModule
 from bot.queries import *
+from .production_manager import ProductionManager
 
 FUNCTIONS = actions.FUNCTIONS
 
@@ -17,7 +18,7 @@ RESOURCE_SPREAD_THRESHOLD = 1500
 BASE_TO_EXPANSION_THRESHOLD = 1000
 
 # TODO: IS THIS GOOD?
-BUILDING_TO_EXPANSION_THRESHOLD = 1500
+BUILDING_TO_EXPANSION_THRESHOLD = 1000
 
 
 class ExpansionManager(LowLevelModule):
@@ -90,9 +91,6 @@ class ExpansionManager(LowLevelModule):
                 self.expansion.append(Expansion(center_pos, minerals, gases, drones))
 
             self.logger.log_game_info('Found %d expansions' % len(self.expansion))
-
-        # The following part just find the initial set of bases
-        if len(self.enemy_expansion()) == 0:
 
             # Find our starting expansion using distance to hatchery
             hatcheries = get_all_owned(units, UNITS[UnitID.Hatchery])
@@ -204,8 +202,13 @@ class ExpansionManager(LowLevelModule):
                         exp.base_queued = False
 
                 if exp.base is not None:
+                    if exp.queen is not None:
+                        # Reset if dead
+                        exp.queen = units_tag_dict.get(exp.queen.tag)
+
                     if exp.queen is None and self.global_info.has_pool:
                         # The queen will inject me but not in this update function
+
                         if exp.queen_queued:
                             # Look for a queen
                             queens = get_all_owned(units, UNITS[UnitID.Queen])
@@ -283,4 +286,37 @@ class ExpansionManager(LowLevelModule):
                 if 251 in avail_abilities:
                     planned_action = FUNCTIONS.Effect_InjectLarva_raw_targeted('now', exp.base.tag, exp.queen.tag)
                     return planned_action
+
+    """
+    Only return each gas position once.
+    Therefore, once returned, you better build it.
+    """
+    def get_next_gas(self, units):
+        if len(self.own_expansion()) == 0:
+            return None
+
+        extractors = get_all_owned(units, UNITS[UnitID.Extractor])
+
+        gases = get_all(units, UNITS[UnitID.VespeneGeyser])
+        gases = [g for g in gases if g.display_type == 1 and not g.has_ongoing_action]
+
+        empty_gases = [
+            g for g in gases if
+            not any([ex.pos.dist(g.pos) < 100 for ex in extractors])
+        ]
+
+        print(empty_gases)
+
+        for g in empty_gases:
+            if g.pos.dist(self.main_expansion().pos) < BUILDING_TO_EXPANSION_THRESHOLD:
+                g.has_ongoing_action = True
+                return g
+
+        for exp in self.own_expansion():
+            for g in empty_gases:
+                if g.pos.dist(exp.pos) < BUILDING_TO_EXPANSION_THRESHOLD:
+                    g.has_ongoing_action = True
+                    return g
+
+        return None
 

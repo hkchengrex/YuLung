@@ -63,7 +63,7 @@ class Hypervisor:
         drones_count = self.produ_man.get_count_ours_and_pending(units, UNITS[UnitID.Drone])
         pools_count = self.produ_man.get_count_ours_and_pending(units, UNITS[UnitID.SpawningPool])
         extractor_count = self.produ_man.get_count_ours_and_pending(units, UNITS[UnitID.Extractor])
-        overlord_count = self.produ_man.get_count_pending(units, UNITS[UnitID.Overlord]) \
+        overlord_count = self.produ_man.get_count_pending(UNITS[UnitID.Overlord]) \
                          + self.global_info.overlord_count
 
         bases = get_all_owned(units, UNITS[UnitID.Hatchery]) \
@@ -81,7 +81,15 @@ class Hypervisor:
             elif pools_count == 0:
                 self.tech_man.enable_tech(UNITS[UnitID.SpawningPool].unit_id)
             elif extractor_count == 0:
-                self.produ_man.build_asap(UNITS[UnitID.Extractor], self.expan_man.main_expansion().gases[0])
+                if self.expan_man.main_expansion() is not None:
+                    next_gas = self.expan_man.get_next_gas(units)
+                    if next_gas is not None:
+                        self.produ_man.build_asap(UNITS[UnitID.Extractor], self.expan_man.get_next_gas(units))
+            elif extractor_count == 1:
+                if self.expan_man.main_expansion() is not None:
+                    next_gas = self.expan_man.get_next_gas(units)
+                    if next_gas is not None:
+                        self.produ_man.build_asap(UNITS[UnitID.Extractor], self.expan_man.get_next_gas(units))
             else:
                 self.produ_man.build_asap(UNITS[UnitID.Zergling])
 
@@ -123,6 +131,7 @@ class Hypervisor:
             return action
 
         action = self.produ_man.update(units, units_tag_dict)
+        self.produ_man.update_ongoing_construction(units_tag_dict)
         if action is not None:
             self.produ_usage += 1
             return action

@@ -127,7 +127,7 @@ class WorkerManager(LowLevelModule):
             selected_drone = random.choice(untracked_drones)
             for exp in expansions:                        
                 #Assign Worker to Mineral Field
-                if exp.base is not None:
+                if exp.base is not None and exp.base.build_progress == 100:
                     if exp.get_assigned_harvesters() < exp.get_ideal_harvesters() or \
                        (exp.base.build_progress < 100 and len(exp.drones) < len(exp.minerals)*2):
                         base_pos = point.Point(exp.base.posx, exp.base.posy)

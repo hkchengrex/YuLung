@@ -168,7 +168,9 @@ class ProductionManager(LowLevelModule):
         for d in self.working_drone_list:
             new_d = units_tag_dict.get(d.tag)
             if new_d is not None:
-                ongoing_construction.append(new_d.action_detail)
+                if new_d.action_detail is not None:
+                    # It should be not None but happens sometime
+                    ongoing_construction.append(new_d.action_detail)
             else:
                 to_be_removed.append(d)
 
@@ -192,10 +194,11 @@ class ProductionManager(LowLevelModule):
             u for u in self.ongoing_construction if u['type'] == unit_type
         ])
 
-    def get_count_pending(self, units, unit_type):
+    def get_count_pending(self, unit_type):
         return len([
             u for u in self.units_pending if u['type'] == unit_type
         ]) + len([
             u for u in self.ongoing_construction if u['type'] == unit_type
         ])
+
 
