@@ -6,12 +6,18 @@ exposes the raw interface.
 
 Running the actual bot:
 
-`python -m pysc2.bin.agent --map Simple64 --agent bot.agent.YuLungAgent --agent_race zerg`
+`python -m pysc2.bin.agent --map "Simple64" 
+--agent bot.agent.YuLungAgent --agent_race zerg
+ --feature_screen_size 128 --feature_minimap_size 25 
+ --camera_width 142
+`
 
 More complex case:
 
-`python -m pysc2.bin.agent --map "Abiogenesis" --agent bot.agent.YuLungAgent --agent_race zerg --feature_screen_size 128 --feature_minimap_size 2 --camera_width 140
-`
+`python -m pysc2.bin.agent --map "Abiogenesis" 
+--agent bot.agent.YuLungAgent --agent_race zerg
+ --feature_screen_size 128 --feature_minimap_size 25 
+ --camera_width 142`
 
 Running the test bot: 
 
