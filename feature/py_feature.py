@@ -8,6 +8,7 @@ PLAYER_RELATIVE_SCALE = features.SCREEN_FEATURES.player_relative.scale
 class FeatureTransform:
 
     def __init__(self, screen_shape):
+
         # (obs) Define Number of Screen Observations ##
         self.n_screen = 2
         # ####

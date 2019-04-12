@@ -1,0 +1,12 @@
+
+For Action Space:
+    1. Change py_action.py
+    2. Change hypervisor.py
+
+The place that need to change are wrapped with comment  --> # (action)
+
+For observation Space:
+    1. Change py_feature.py
+    2. Change test_ppo.py
+
+The place that need to change are wrapped with comment --> # (obs)
