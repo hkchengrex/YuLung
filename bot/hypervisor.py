@@ -127,14 +127,17 @@ class Hypervisor:
         '''
 
         action = {"discrete_output": action[0].astype(int), "continous_output": action[1]}
-        #################Define#########################
+
+        # (action) Refer to py_action, the output of action #
+
         action_id = action["discrete_output"][0]
         action_act = action["discrete_output"][1]
         unit_id = action["discrete_output"][2]
         x = action["discrete_output"][3]
         y = action["discrete_output"][4]
         temp = action["continous_output"][0]
-        ################################################
+
+        # ####
 
         if action_id == 0:
             action = self.comba_man.update(units)
@@ -146,3 +149,4 @@ class Hypervisor:
         else:
             action = None
         return action
+

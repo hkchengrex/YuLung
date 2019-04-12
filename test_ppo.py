@@ -48,18 +48,50 @@ def main():
     envs = make_vec_envs(args.env_name, args.seed, args.num_processes,
                          args.gamma, args.log_dir, device, False)
 
+    # (obs)  Define the Screen Observation Space
+
+    # 1. Defined by pysc2
+    # screen_0 = features.SCREEN_FEATURES.player_relative
+
+    # 2. Defined by custom
+    # Required Field
+    # a. type (features.FeatureType.CATEGORICAL / features.FeatureType.SCALAR)
+    # b. scale (For categorical, it is the number of classes, for scalar it is used to
+    #    perform log transform as in Pysc2 paper)
+    # (Other Just Fill Anythings)
+    screen_0 = features.Feature(type=features.FeatureType.CATEGORICAL, scale=6, name="", layer_set=None, full_name=None,
+                                palette=None, clip=False
+                                , index=0)
+    screen_1 = features.Feature(type=features.FeatureType.SCALAR, scale=3, name="", layer_set=None, full_name=None,
+                                palette=None, clip=False
+                                , index=0)
+
+    # Define the Info Observation Space
+    # Required Field
+    # [0]. features.FeatureType.CATEGORICAL / features.FeatureType.SCALAR
+    # [1]. index
+    # [2]. scale (For categorical, it is the number of classes, it is used to
+    #    perform log transform as in Pysc2 paper)
+
+    info_discrete_0 = SVSpec(features.FeatureType.CATEGORICAL, 0, 5)
+    info_scalar_1 = SVSpec(features.FeatureType.SCALAR, 1, 1.)
+    info_scalar_2 = SVSpec(features.FeatureType.SCALAR, 2, 1.)
+    info_scalar_3 = SVSpec(features.FeatureType.SCALAR, 3, 1.)
+    info_scalar_4 = SVSpec(features.FeatureType.SCALAR, 4, 1.)
+
+    # ####
 
     actor_critic = Policy(
         envs.observation_space,
         envs.action_space,
-        #################Define#########################
-        [features.SCREEN_FEATURES.player_relative],
-        [SVSpec(features.FeatureType.CATEGORICAL, 0, 5),
-         SVSpec(features.FeatureType.SCALAR, 1, 1.),
-         SVSpec(features.FeatureType.SCALAR, 2, 1.),
-         SVSpec(features.FeatureType.SCALAR, 3, 1.),
-         SVSpec(features.FeatureType.SCALAR, 4, 1.)],
-        #################Define#########################
+        # (obs) Copy the above definition to this ##
+        [screen_0, screen_1],
+        [info_discrete_0,
+         info_scalar_1,
+         info_scalar_2,
+         info_scalar_3,
+         info_scalar_4],
+        # ####
         base_kwargs={'recurrent': args.recurrent_policy})
     actor_critic.to(device)
 
