@@ -81,7 +81,8 @@ class Hypervisor:
             elif pools_count == 0:
                 self.tech_man.enable_tech(UNITS[UnitID.SpawningPool].unit_id)
             elif extractor_count == 0:
-                self.produ_man.build_asap(UNITS[UnitID.Extractor], self.expan_man.main_expansion().gases[0])
+                if self.expan_man.main_expansion() is not None:
+                    self.produ_man.build_asap(UNITS[UnitID.Extractor], self.expan_man.main_expansion().gases[0])
             else:
                 self.produ_man.build_asap(UNITS[UnitID.Zergling])
 
@@ -123,6 +124,7 @@ class Hypervisor:
             return action
 
         action = self.produ_man.update(units, units_tag_dict)
+        self.produ_man.update_ongoing_construction(units_tag_dict)
         if action is not None:
             self.produ_usage += 1
             return action

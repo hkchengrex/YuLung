@@ -168,7 +168,9 @@ class ProductionManager(LowLevelModule):
         for d in self.working_drone_list:
             new_d = units_tag_dict.get(d.tag)
             if new_d is not None:
-                ongoing_construction.append(new_d.action_detail)
+                if new_d.action_detail is not None:
+                    # It should be not None but happens sometime
+                    ongoing_construction.append(new_d.action_detail)
             else:
                 to_be_removed.append(d)
 

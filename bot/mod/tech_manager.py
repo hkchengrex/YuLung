@@ -41,5 +41,9 @@ class TechManager(LowLevelModule):
             if tech_enable:
                 if prod_man.get_count_ours_and_pending(units, ZERG_TECH_BUILDINGS[i]) == 0:
                     to_be_built.append(ZERG_TECH_BUILDINGS[i])
+                else:
+                    # print(prod_man.units_pending)
+                    # print('Ongoing', prod_man.ongoing_construction)
+                    pass
 
         return to_be_built
