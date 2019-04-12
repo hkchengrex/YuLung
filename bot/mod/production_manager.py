@@ -194,10 +194,11 @@ class ProductionManager(LowLevelModule):
             u for u in self.ongoing_construction if u['type'] == unit_type
         ])
 
-    def get_count_pending(self, units, unit_type):
+    def get_count_pending(self, unit_type):
         return len([
             u for u in self.units_pending if u['type'] == unit_type
         ]) + len([
             u for u in self.ongoing_construction if u['type'] == unit_type
         ])
+
 
