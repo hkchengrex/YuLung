@@ -40,7 +40,7 @@ class Hypervisor:
         self.work_usage = 0
         self.queen_usage = 0
 
-    def process(self, obs):
+    def process(self, action, obs):
         units, units_tag_dict = self.global_info.update(obs)
 
         hatchery_build_pos, queens_to_be_build = self.expan_man.update_expansion(units, units_tag_dict)
@@ -57,8 +57,8 @@ class Hypervisor:
         """
         Hardcoded simple rules here
         """
-        if len(self.expan_man.own_expansion()) < 2:
-            self.expan_man.claim_expansion(self.expan_man.get_next_expansion())
+        ##if len(self.expan_man.own_expansion()) < 2:
+        ##    self.expan_man.claim_expansion(self.expan_man.get_next_expansion())
 
         drones_count = self.produ_man.get_count_ours_and_pending(units, UNITS[UnitID.Drone])
         pools_count = self.produ_man.get_count_ours_and_pending(units, UNITS[UnitID.SpawningPool])
@@ -140,6 +140,30 @@ class Hypervisor:
         if action is not None:
             self.scout_usage += 1
             return action
+
+        # action = {"discrete_output": action[0].astype(int), "continous_output": action[1]}
+        #
+        # # (action) Refer to py_action, the output of action #
+        #
+        # action_id = action["discrete_output"][0]
+        # action_act = action["discrete_output"][1]
+        # unit_id = action["discrete_output"][2]
+        # x = action["discrete_output"][3]
+        # y = action["discrete_output"][4]
+        # temp = action["continous_output"][0]
+        #
+        # # ####
+        #
+        # if action_id == 0:
+        #     action = self.comba_man.update(units)
+        # elif action_id == 1:
+        #     action = self.produ_man.update(units, units_tag_dict)
+        # elif action_id == 2:
+        #     ratio = 1
+        #     action = self.work_man.assign(units, self.expan_man.expansion, ratio)
+        # else:
+        #     action = None
+        # return action
 
         if self.iter % 5 == 0:
             action = self.expan_man.queen_inject()

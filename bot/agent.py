@@ -16,6 +16,7 @@ class YuLungAgent(base_agent.BaseAgent):
         super().__init__(env)
         self.camera_moved = False
         self.hypervisor = None
+        self.action = None
 
     def reset(self):
         super(YuLungAgent, self).reset()
@@ -31,7 +32,7 @@ class YuLungAgent(base_agent.BaseAgent):
             return FUNCTIONS.move_camera([11, 13])
 
         try:
-            action = self.hypervisor.process(obs)
+            action = self.hypervisor.process(self.action, obs)
         except pysc2.lib.protocol.ProtocolError as e:
             action = None
             print('Protocol exception caught in base agent', e)
@@ -40,3 +41,6 @@ class YuLungAgent(base_agent.BaseAgent):
             return action
 
         return FUNCTIONS.no_op()
+
+    def set_action(self, action):
+        self.action = action
