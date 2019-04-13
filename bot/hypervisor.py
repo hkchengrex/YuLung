@@ -6,10 +6,9 @@ from bot.mod.global_info import GlobalInfo
 from bot.mod.production_manager import ProductionManager
 from bot.mod.scout_manager import ScoutManager
 from bot.mod.tech_manager import TechManager
+from bot.mod.worker_manager import WorkerManager
 from bot.util.helper import *
 from bot.util.static_units import *
-
-from bot.mod.worker_manager import WorkerManager
 
 
 class Hypervisor:
@@ -25,26 +24,50 @@ class Hypervisor:
         self.produ_man = ProductionManager(self.global_info)
         self.comba_man = CombatManager(self.global_info)
         self.scout_man = ScoutManager(self.global_info)
-        self.scout_man.go_scout_once()
         self.work_man = WorkerManager(self.global_info)
         self.tech_man = TechManager(self.global_info)
+
+        self.scout_man.set_scout_tar([exp.pos for exp in self.expan_man.expansion])
+        self.scout_man.go_scout_once()
 
         self.global_info.log_game_info("Hypervisor initialized.")
 
         self.produ_man.build_asap(UNITS[UnitID.Overlord])
 
-        self.iter = 0
+        self.global_iter = 0
+        self.local_iter = 0
+
+        # Action usage info
         self.produ_usage = 0
         self.comba_usage = 0
         self.scout_usage = 0
         self.work_usage = 0
         self.queen_usage = 0
+        self.last_queen_iter = 0
 
-    def process(self, action, obs):
+    def process(self, macro_action, obs):
         units, units_tag_dict = self.global_info.update(obs)
 
-        hatchery_build_pos, queens_to_be_build = self.expan_man.update_expansion(units, units_tag_dict)
+        """
+        Applying macro actions
+        """
+        action = {"discrete_output": macro_action[0].astype(int), "continous_output": macro_action[1]}
 
+        action_id = action["discrete_output"][0]
+        action_act = action["discrete_output"][1]
+        unit_id = action["discrete_output"][2]
+        x = action["discrete_output"][3]
+        y = action["discrete_output"][4]
+        temp = action["continous_output"][0]
+
+        print('Macro action', action_id, action_act, x, y, temp)
+
+        """
+        Routine update within hypervisor and low-level modules
+        """
+
+        # Hatchery / queen build request from expansion manager, just do it
+        hatchery_build_pos, queens_to_be_build = self.expan_man.update_expansion(units, units_tag_dict)
         for pos in hatchery_build_pos:
             self.produ_man.build_asap(UNITS[UnitID.Hatchery], pos)
         if queens_to_be_build > 0:
@@ -52,80 +75,43 @@ class Hypervisor:
 
         self.produ_man.set_base_locations([exp.pos for exp in self.expan_man.own_expansion() if exp.base is not None])
 
-        self.scout_man.set_scout_tar([exp.pos for exp in self.expan_man.expansion])
-
-        """
-        Hardcoded simple rules here
-        """
-        if len(self.expan_man.own_expansion()) < 2:
-           self.expan_man.claim_expansion(self.expan_man.get_next_expansion())
-
-        drones_count = self.produ_man.get_count_ours_and_pending(units, UNITS[UnitID.Drone])
-        pools_count = self.produ_man.get_count_ours_and_pending(units, UNITS[UnitID.SpawningPool])
-        extractor_count = self.produ_man.get_count_ours_and_pending(units, UNITS[UnitID.Extractor])
+        # Force building overlord when the need arises
         overlord_count = self.produ_man.get_count_pending(UNITS[UnitID.Overlord]) \
                          + self.global_info.overlord_count
-
         bases = get_all_owned(units, UNITS[UnitID.Hatchery]) \
                  + get_all_owned(units, UNITS[UnitID.Lair]) \
                  + get_all_owned(units, UNITS[UnitID.Hive])
-        max_drones = len(bases) * 16
-
         if self.global_info.resources.food_used + 4 > overlord_count*8 + len(bases)*6:
             self.produ_man.build_asap(UNITS[UnitID.Overlord])
             self.global_info.log_game_info('Building overlord under pressure', False)
 
-        if len(self.produ_man.units_pending) == 0:
-            if drones_count < max_drones:
-                self.produ_man.build_asap(UNITS[UnitID.Drone])
-            elif pools_count == 0:
-                self.tech_man.enable_tech(UNITS[UnitID.SpawningPool].unit_id)
-            elif extractor_count == 0:
-                if self.expan_man.main_expansion() is not None:
-                    next_gas = self.expan_man.get_next_gas(units)
-                    if next_gas is not None:
-                        self.produ_man.build_asap(UNITS[UnitID.Extractor], next_gas)
-            elif extractor_count == 1:
-                if self.expan_man.main_expansion() is not None:
-                    next_gas = self.expan_man.get_next_gas(units)
-                    if next_gas is not None:
-                        self.produ_man.build_asap(UNITS[UnitID.Extractor], next_gas)
-            else:
-                self.produ_man.build_asap(UNITS[UnitID.Zergling])
-
-        if len(self.expan_man.enemy_expansion()) > 0:
-            self.comba_man.set_attack_tar(self.expan_man.enemy_expansion()[0].pos)
-        else:
-            self.comba_man.try_annihilate()
-
         self.work_man.track(units, self.expan_man.expansion)
-        """
-        End of hardcoded simple rules
-        """
 
-        # Update tech requirement
+        # Update tech requirement from tech manager
         tech_to_be_built = self.tech_man.update(units, self.produ_man)
         for t in tech_to_be_built:
             self.produ_man.build_asap(t)
 
-        self.iter += 1
-        if self.iter % 100 == 0:
+        # Keep track of action usage
+        self.local_iter += 1
+        self.global_iter += 1
+        if self.local_iter % 100 == 0:
             print('Comba usage: %d' % self.comba_usage)
             print('Produ usage: %d' % self.produ_usage)
             print('Work  usage: %d' % self.work_usage)
             print('Scout usage: %d' % self.scout_usage)
             print('Queen usage: %d' % self.scout_usage)
-            print('Idle:        %d' % (self.iter-self.comba_usage-self.produ_usage
+            print('Idle:        %d' % (self.local_iter-self.comba_usage-self.produ_usage
                                        -self.work_usage-self.scout_usage-self.queen_usage))
 
-            self.iter = self.comba_usage = self.produ_usage \
+            self.local_iter = self.comba_usage = self.produ_usage \
                 = self.work_usage = self.scout_usage = self.queen_usage = 0
 
         # Define priorities here. TODO: Might need to give priorities dynamically
         action = self.comba_man.update(units, self.expan_man.expansion)
         if action is not None:
             self.comba_usage += 1
-            return action        
+            return action
 
         ratio = 1
         action = self.work_man.assign(units, self.expan_man.expansion, ratio)
@@ -144,31 +130,8 @@ class Hypervisor:
             self.scout_usage += 1
             return action
 
-        # action = {"discrete_output": action[0].astype(int), "continous_output": action[1]}
-        #
-        # # (action) Refer to py_action, the output of action #
-        #
-        # action_id = action["discrete_output"][0]
-        # action_act = action["discrete_output"][1]
-        # unit_id = action["discrete_output"][2]
-        # x = action["discrete_output"][3]
-        # y = action["discrete_output"][4]
-        # temp = action["continous_output"][0]
-        #
-        # # ####
-        #
-        # if action_id == 0:
-        #     action = self.comba_man.update(units)
-        # elif action_id == 1:
-        #     action = self.produ_man.update(units, units_tag_dict)
-        # elif action_id == 2:
-        #     ratio = 1
-        #     action = self.work_man.assign(units, self.expan_man.expansion, ratio)
-        # else:
-        #     action = None
-        # return action
-
-        if self.iter % 5 == 0:
+        if (self.global_iter - self.last_queen_iter) > 5:
+            self.last_queen_iter = self.global_iter
             action = self.expan_man.queen_inject()
             if action is not None:
                 self.queen_usage += 1
