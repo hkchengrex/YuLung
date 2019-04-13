@@ -23,6 +23,7 @@ class YuLungAgent(base_agent.BaseAgent):
 
         self.hypervisor = Hypervisor(self.sc2_env)
         self.camera_moved = False
+        self.action = None
 
     def step(self, obs):
         super(YuLungAgent, self).step(obs)

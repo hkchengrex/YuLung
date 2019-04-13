@@ -48,6 +48,13 @@ class Hypervisor:
     def process(self, macro_action, obs):
         units, units_tag_dict = self.global_info.update(obs)
 
+        # # Init might not be done using gym environment
+        # if len(units) == 0:
+        #     print('Initialization')
+        #     return None
+        #
+        # print(units)
+
         """
         Applying macro actions
         """
@@ -60,7 +67,7 @@ class Hypervisor:
         y = action["discrete_output"][4]
         temp = action["continous_output"][0]
 
-        print('Macro action', action_id, action_act, x, y, temp)
+        # print('Macro action', action_id, action_act, x, y, temp)
 
         """
         Routine update within hypervisor and low-level modules

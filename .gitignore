@@ -1,5 +1,6 @@
 .idea/
 venv/
+trained_models/
 
 *.pyc
 *_pb2.py

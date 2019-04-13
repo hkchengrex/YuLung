@@ -1,8 +1,9 @@
 import logging
+import typing
+from typing import Optional
 
 import numpy as np
 
-from pysc2.agents import base_agent
 from pysc2.lib import actions, features
 from pysc2.env import sc2_env
 from feature.py_feature import FeatureTransform
@@ -11,7 +12,6 @@ from pysc2.env.environment import StepType
 import gym
 from bot.agent import YuLungAgent
 from gym import spaces
-from envs.base_env import SC2BaseEnv
 from bot.hypervisor import Hypervisor
 
 # With reference from https://github.com/islamelnabarawy/sc2gym/blob/master/sc2gym/envs/sc2_game.py
@@ -38,7 +38,7 @@ class YuLungEnv(gym.Env):
         self.action_transform = None
         self.obs = None
 
-        self.agent = None
+        self.agent = None  # type: Optional[YuLungAgent]
 
         self.available_actions = []
 
@@ -46,8 +46,6 @@ class YuLungEnv(gym.Env):
         from absl import flags
         FLAGS = flags.FLAGS
         FLAGS(sys.argv[0:1])
-
-        # print("Init called")
 
     def reset(self):
         if self._env is None:
@@ -62,9 +60,9 @@ class YuLungEnv(gym.Env):
         obs = self._env.reset()[0]
         self.available_actions = obs.observation['available_actions']
 
+        self.get_agent().reset()
         obs = self._env.step([actions.FunctionCall(FUNCTIONS.no_op.id, [])])[0]
         self.obs = obs
-        self.get_agent().reset()
 
         return self._process_obs(obs)
 
@@ -75,24 +73,26 @@ class YuLungEnv(gym.Env):
         else:
             return self.agent
 
-    def step(self, action):
+    def step(self, macro_action):
         self._num_step += 1
-        # self.agent.set_action(action)
-        # if action[0] not in self.available_actions:
-        obs = self._env.step([actions.FunctionCall(FUNCTIONS.no_op.id, [])])[0]
-        # else:
-        #     obs = self._env.step([actions.FunctionCall(*action)])[0]
-        self.available_actions = obs.observation.available_actions
-        self._epi_reward += obs.reward
 
-        if obs is None:
-            return None, 0, True, {}
-        self.obs = obs
+        self.agent.set_action(macro_action)
 
-        reward = obs.reward
-        done = obs.step_type == StepType.LAST
+        for _ in range(3):
+            action = self.agent.step(self.obs)
+            self.obs = self._env.step([action])[0]
 
-        obs = self._process_obs(obs)
+        self.available_actions = self.obs.observation.available_actions
+        self._epi_reward += self.obs.reward
+
+        # if obs is None:
+        #     return None, 0, True, {}
+        # self.obs = obs
+
+        reward = self.obs.reward
+        done = self.obs.step_type == StepType.LAST
+
+        obs = self._process_obs(self.obs)
 
         return obs, reward, done, {}
 
@@ -108,7 +108,14 @@ class YuLungEnv(gym.Env):
     def _init_env(self):
         args = {**self.kwargs}
         # logger.debug("Initializing SC2Env: %s", args)
-        self._env = sc2_env.SC2Env(**args)
+
+        players = [
+            # self.get_agent(),
+            sc2_env.Agent(race=sc2_env.Race.zerg, name='YuLungAgent'),
+            sc2_env.Bot(race=sc2_env.Race.random, difficulty=sc2_env.Difficulty.very_easy)
+        ]
+
+        self._env = sc2_env.SC2Env(players=players, **args)
         self.sc2_env = self._env
 
     # def _log_episode_info(self):
@@ -195,4 +202,18 @@ class YuLungEnv(gym.Env):
 
 class YuLungSimple64Env(YuLungEnv):
     def __init__(self, **kwargs):
-        super().__init__(map_name='Simple64', visualize=True, **kwargs)
+        super().__init__(
+            map_name='Simple64',
+            visualize=False,
+            step_mul = 8,
+            agent_interface_format = sc2_env.parse_agent_interface_format(
+                feature_screen=84,
+                feature_minimap=25,
+                rgb_screen=None,
+                rgb_minimap=None,
+                action_space='FEATURES',
+                use_feature_units=False,
+                use_raw_units=True,
+                camera_width_world_units=142,
+            ),
+            **kwargs)
