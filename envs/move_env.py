@@ -10,7 +10,7 @@ from feature.py_action import ActionTransform
 import gym
 from bot.agent import YuLungAgent
 from gym import spaces
-from gym_env.base_env import SC2BaseEnv
+from envs.base_env import SC2BaseEnv
 from bot.hypervisor import Hypervisor
 
 FUNCTIONS = actions.FUNCTIONS

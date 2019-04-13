@@ -24,7 +24,7 @@ from a2c_ppo_acktr.storage import RolloutStorage
 from evaluation import evaluate
 from pysc2.lib import actions, features
 from pysc2.env import sc2_env
-import gym_env
+import envs
 
 
 def main():
