@@ -57,8 +57,8 @@ class Hypervisor:
         """
         Hardcoded simple rules here
         """
-        ##if len(self.expan_man.own_expansion()) < 2:
-        ##    self.expan_man.claim_expansion(self.expan_man.get_next_expansion())
+        if len(self.expan_man.own_expansion()) < 2:
+           self.expan_man.claim_expansion(self.expan_man.get_next_expansion())
 
         drones_count = self.produ_man.get_count_ours_and_pending(units, UNITS[UnitID.Drone])
         pools_count = self.produ_man.get_count_ours_and_pending(units, UNITS[UnitID.SpawningPool])
@@ -95,6 +95,9 @@ class Hypervisor:
 
         if len(self.expan_man.enemy_expansion()) > 0:
             self.comba_man.set_attack_tar(self.expan_man.enemy_expansion()[0].pos)
+        else:
+            self.comba_man.try_annihilate()
+
         self.work_man.track(units, self.expan_man.expansion)
         """
         End of hardcoded simple rules
@@ -119,7 +122,7 @@ class Hypervisor:
                 = self.work_usage = self.scout_usage = self.queen_usage = 0
 
         # Define priorities here. TODO: Might need to give priorities dynamically
-        action = self.comba_man.update(units)
+        action = self.comba_man.update(units, self.expan_man.expansion)
         if action is not None:
             self.comba_usage += 1
             return action        
