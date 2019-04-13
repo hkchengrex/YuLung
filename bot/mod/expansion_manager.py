@@ -92,6 +92,9 @@ class ExpansionManager(LowLevelModule):
 
             self.logger.log_game_info('Found %d expansions' % len(self.expansion))
 
+            # Sort the expansions using distance to lower left corner
+            self.expansion = sorted(self.expansion, key=lambda x: x.pos.dist(point.Point(0, 0)))
+
             # Find our starting expansion using distance to hatchery
             hatcheries = get_all_owned(units, UNITS[UnitID.Hatchery])
             for exp in self.expansion:
