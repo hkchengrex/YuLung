@@ -76,11 +76,12 @@ class YuLungEnv(gym.Env):
     def step(self, macro_action):
         self._num_step += 1
 
-        self.agent.set_action(macro_action)
+        self.agent.set_macro_action(macro_action)
 
         for _ in range(3):
             action = self.agent.step(self.obs)
             self.obs = self._env.step([action])[0]
+            self.agent.set_macro_action(None)
 
         self.available_actions = self.obs.observation.available_actions
         self._epi_reward += self.obs.reward

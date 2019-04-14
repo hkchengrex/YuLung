@@ -47,6 +47,8 @@ class Hypervisor:
         self.queen_usage = 0
         self.last_queen_iter = 0
 
+        self.mineral_worker_ratio = 0.5
+
     @staticmethod
     def get_macro_action_spec():
         return {'discrete': [
@@ -65,58 +67,59 @@ class Hypervisor:
         """
         Some initialization steps
         """
-        hatchery_build_pos, queens_to_be_build = self.expan_man.update_expansion(units, units_tag_dict)
+        hatchery_build_pos, queens_to_be_build = self.expan_man.update_expansion(units, units_tag_dict, self.produ_man)
 
         """
         Applying macro actions
         """
-        discrete_input = macro_action[0]
-        # continuous_input = macro_action[1]
+        if macro_action is not None:
+            discrete_input = macro_action[0]
+            # continuous_input = macro_action[1]
 
-        comb_action = CombatAction(discrete_input[0])
-        cons_action = ConstructionAction(discrete_input[1])
-        tech_action = TechAction(discrete_input[2])
-        misc_action = MiscAction(discrete_input[3])
-        reso_action = ResourcesAction(discrete_input[4])
-        amou_action = ConstructAmountAction(discrete_input[5])
+            comb_action = CombatAction(discrete_input[0])
+            cons_action = ConstructionAction(discrete_input[1])
+            tech_action = TechAction(discrete_input[2])
+            misc_action = MiscAction(discrete_input[3])
+            reso_action = ResourcesAction(discrete_input[4])
+            amou_action = ConstructAmountAction(discrete_input[5])
 
-        # After 2000 steps (around 12 minutes, FORCE ANNIHILATION!!!)
-        if self.global_iter < 2000:
-            # Combat resolution
-            if comb_action < CombatAction.MOVE_EXP_0:
-                self.comba_man.set_attack_tar(self.expan_man.expansion[comb_action].pos)
-            elif comb_action < CombatAction.ELIMINATE:
-                self.comba_man.set_attack_tar(self.expan_man.expansion[comb_action-CombatAction.MOVE_EXP_0].pos)
+            # After 2000 steps (around 12 minutes, FORCE ANNIHILATION!!!)
+            if self.global_iter < 2000:
+                # Combat resolution
+                if comb_action < CombatAction.MOVE_EXP_0:
+                    self.comba_man.set_attack_tar(self.expan_man.expansion[comb_action].pos)
+                elif comb_action < CombatAction.ELIMINATE:
+                    self.comba_man.set_attack_tar(self.expan_man.expansion[comb_action-CombatAction.MOVE_EXP_0].pos)
+                else:
+                    self.comba_man.try_annihilate()
             else:
                 self.comba_man.try_annihilate()
-        else:
-            self.comba_man.try_annihilate()
 
-        # Construction resolution
-        if cons_action != ConstructionAction.NO_OP:
-            if cons_action == ConstructionAction.BUILD_EXPANSION:
-                self.expan_man.claim_expansion(self.expan_man.get_next_expansion())
-            elif cons_action == ConstructionAction.BUILD_EXTRACTOR:
-                # Build only when none is being built, otherwise it will be buggy
-                if self.produ_man.get_count_pending(UNITS[UnitID.Extractor]) == 0:
-                    if self.expan_man.main_expansion() is not None:
-                        next_gas = self.expan_man.get_next_gas(units)
-                        if next_gas is not None:
-                            self.produ_man.build_asap(UNITS[UnitID.Extractor], pos=next_gas)
-            else:
-                self.produ_man.build_units_with_checking(CONSTRUCTION_UNITS_MAPPING[cons_action],
-                                                         amount=CONSTRUCT_AMOUNT_MAPPING[amou_action])
+            # Construction resolution
+            if cons_action != ConstructionAction.NO_OP:
+                if cons_action == ConstructionAction.BUILD_EXPANSION:
+                    self.expan_man.claim_expansion(self.expan_man.get_next_expansion())
+                elif cons_action == ConstructionAction.BUILD_EXTRACTOR:
+                    # Build only when none is being built, otherwise it will be buggy
+                    if self.produ_man.get_count_pending(UNITS[UnitID.Extractor]) == 0:
+                        if self.expan_man.main_expansion() is not None:
+                            next_gas = self.expan_man.get_next_gas(units)
+                            if next_gas is not None:
+                                self.produ_man.build_asap(UNITS[UnitID.Extractor], pos=next_gas)
+                else:
+                    self.produ_man.build_units_with_checking(CONSTRUCTION_UNITS_MAPPING[cons_action],
+                                                             amount=CONSTRUCT_AMOUNT_MAPPING[amou_action])
 
-        # Tech resolution
-        if tech_action != TechAction.NO_OP:
-            self.tech_man.enable_tech(TECH_UNITS_MAPPING[tech_action])
+            # Tech resolution
+            if tech_action != TechAction.NO_OP:
+                self.tech_man.enable_tech(TECH_UNITS_MAPPING[tech_action])
 
-        # Misc resolution
-        if misc_action == MiscAction.SCOUT_ONCE:
-            self.scout_man.go_scout_once()
+            # Misc resolution
+            if misc_action == MiscAction.SCOUT_ONCE:
+                self.scout_man.go_scout_once()
 
-        # Resources resolution
-        mineral_worker_ratio = RESOURCES_RATIO_MAPPING[reso_action]
+            # Resources resolution
+            self.mineral_worker_ratio = RESOURCES_RATIO_MAPPING[reso_action]
 
         """
         Routine update within hypervisor and low-level modules
@@ -163,17 +166,18 @@ class Hypervisor:
                 = self.work_usage = self.scout_usage = self.queen_usage = 0
 
         # Define priorities here. TODO: Might need to give priorities dynamically
-        action = self.comba_man.update(units, self.expan_man.expansion)
-        if action is not None:
-            self.comba_usage += 1
-            return action
 
-        action = self.work_man.assign(units, self.expan_man.expansion, mineral_worker_ratio)
+        # Only update when there is an incoming macro action
+        if macro_action is not None:
+            action = self.comba_man.update(units, self.expan_man.expansion)
+            if action is not None:
+                self.comba_usage += 1
+                return action
+
+        action = self.work_man.assign(units, self.expan_man.expansion, self.mineral_worker_ratio)
         if action is not None:
             self.work_usage += 1
             return action
-
-        print([u['type'].name for u in self.produ_man.units_pending])
 
         if self.expan_man.main_expansion() is not None:
             main_base = self.expan_man.main_expansion().base

@@ -172,6 +172,10 @@ class ProductionManager(LowLevelModule):
                                     return planned_action
                                 else:
                                     print('Failed to build at ', str(build_pos))
+                                    # Just remove it from the queue
+                                    # Since I changed an item in the for loop, better return
+                                    self.units_pending.remove(pending)
+                                    return planned_action
 
                             else:
                                 # Targeted build, like extractors

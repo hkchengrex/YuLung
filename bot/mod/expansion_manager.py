@@ -152,7 +152,7 @@ class ExpansionManager(LowLevelModule):
             self.logger.log_game_info('Claimed expansion at %s ' % str(exp.pos))
             exp.ownership = Alliance.Self
 
-    def update_expansion(self, units: typing.List[Unit], units_tag_dict: typing.Dict[int, Unit]):
+    def update_expansion(self, units: typing.List[Unit], units_tag_dict: typing.Dict[int, Unit], produ_man: ProductionManager):
         """
         Enemy's expansion is defined to be an expansion with a nearby enemy building (unmovable things)
         Our expansion is what we claim it is. It does not matter whether we have structures around it.
@@ -185,8 +185,7 @@ class ExpansionManager(LowLevelModule):
             if exp.ownership == Alliance.Self:
 
                 # Build hatchery if we haven't
-                if exp.base is None and not exp.base_queued:
-                    exp.base_queued = True
+                if exp.base is None and not produ_man.check_exist_in_queue(UNITS[UnitID.Hatchery]):
                     hatchery_build_pos.append(exp.pos)
                     self.logger.log_game_info("Wanted to build hatchery at %s" % str(exp.pos))
 
@@ -201,7 +200,6 @@ class ExpansionManager(LowLevelModule):
                 for b in our_bases:
                     if b.pos.dist(exp.pos) < BASE_TO_EXPANSION_THRESHOLD:
                         exp.base = b
-                        exp.base_queued = False
 
                 if exp.base is not None:
                     if exp.queen is not None:
