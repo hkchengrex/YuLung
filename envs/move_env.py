@@ -102,7 +102,7 @@ class SimpleMovementEnv(SC2BaseEnv):
     def _get_action_space(self):
         self.action_transform = ActionTransform()
         space = spaces.Dict({
-            "continous_output": spaces.Box(low=self.action_transform.low, high=self.action_transform.high,
+            "continuous_output": spaces.Box(low=self.action_transform.low, high=self.action_transform.high,
                                            dtype=np.int32),
             "discrete_output": spaces.MultiDiscrete(self.action_transform.discrete_space)
         })

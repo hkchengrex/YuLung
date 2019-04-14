@@ -53,3 +53,6 @@ class GlobalInfo(GameLogger):
             return (self.resources.mineral >= unit.mineral_cost
                     and self.resources.vespene >= unit.vespene_cost
                     and self.avail_food() >= unit.food_required)
+
+    def check_if_unit_exist(self, unit_type: UnitType):
+        return len(get_all_owned(self.consistent_units.units, unit_type)) > 0

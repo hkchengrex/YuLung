@@ -1,67 +1,105 @@
 import enum
+from bot.util.static_units import *
 
 
-class AutoNumber(enum.IntEnum):
-    def __new__(cls):
-        value = len(cls.__members__) + 1
-        obj = object.__new__(cls)
-        obj._value_ = value
-        return obj
+class CombatAction(enum.IntEnum):
+    ATTACK_EXP_0 = 0
+    ATTACK_EXP_1 = 1
+    ATTACK_EXP_2 = 2
+    ATTACK_EXP_3 = 3
+
+    MOVE_EXP_0 = 4
+    MOVE_EXP_1 = 5
+    MOVE_EXP_2 = 6
+    MOVE_EXP_3 = 7
+
+    ELIMINATE = 8
 
 
-class CombatAction(AutoNumber):
-    ATTACK_EXP_0 = ()
-    ATTACK_EXP_1 = ()
-    ATTACK_EXP_2 = ()
-    ATTACK_EXP_3 = ()
+class ConstructionAction(enum.IntEnum):
+    NO_OP = 0
 
-    MOVE_EXP_0 = ()
-    MOVE_EXP_1 = ()
-    MOVE_EXP_2 = ()
-    MOVE_EXP_3 = ()
-
-    ELIMINATE = ()
-
-
-class ConstructionAction(AutoNumber):
-    NO_OP = ()
-
-    BUILD_EXPANSION = ()
-    BUILD_EXTRACTOR = ()
+    BUILD_EXPANSION = 1
+    BUILD_EXTRACTOR = 2
 
     # Some units are skipped.
     # No point building caster when you cannot cast.
-    BUILD_DRONE = ()
-    BUILD_OVERLORD = ()
-    BUILD_ZERGLING = ()
-    BUILD_ROACH = ()
-    BUILD_QUEEN = ()
-    BUILD_HYDRALISK = ()
-    BUILD_SWARM_HOST = ()
-    BUILD_MUTALISK = ()
-    BUILD_CORRUPTOR = ()
-    BUILD_ULTRALISK = ()
-    BUILD_OVERSEER = ()
+    BUILD_DRONE = 3
+    BUILD_OVERLORD = 4
+    BUILD_ZERGLING = 5
+    BUILD_ROACH = 6
+    BUILD_QUEEN = 7
+    BUILD_HYDRALISK = 8
+    # BUILD_SWARM_HOST = 9
+    BUILD_MUTALISK = 9
+    BUILD_CORRUPTOR = 10
+    BUILD_ULTRALISK = 11
+    BUILD_OVERSEER = 12
 
 
-class TechAction(AutoNumber):
-    NO_OP = ()
+CONSTRUCTION_UNITS_MAPPING = {
+    ConstructionAction.BUILD_DRONE: UNITS[UnitID.Drone],
+    ConstructionAction.BUILD_OVERLORD: UNITS[UnitID.Overlord],
+    ConstructionAction.BUILD_ZERGLING: UNITS[UnitID.Zergling],
+    ConstructionAction.BUILD_ROACH: UNITS[UnitID.Roach],
+    ConstructionAction.BUILD_QUEEN: UNITS[UnitID.Queen],
+    ConstructionAction.BUILD_HYDRALISK: UNITS[UnitID.Hydralisk],
+    # ConstructionAction.BUILD_SWARM_HOST: UNITS[UnitID.SwarmHostMP],
+    ConstructionAction.BUILD_MUTALISK: UNITS[UnitID.Mutalisk],
+    ConstructionAction.BUILD_CORRUPTOR: UNITS[UnitID.Corruptor],
+    ConstructionAction.BUILD_ULTRALISK: UNITS[UnitID.Ultralisk],
+    ConstructionAction.BUILD_OVERSEER: UNITS[UnitID.Overseer],
+}
 
-    MAKE_SPAWNING_POOL = ()
-    MAKE_ROACH_WARREN = ()
+
+class TechAction(enum.IntEnum):
+    NO_OP = 0
+
+    MAKE_SPAWNING_POOL = 1
+    MAKE_ROACH_WARREN = 2
     # MAKE_BANELING_NEST = ()
-    MAKE_LAIR = ()
-    MAKE_HYDRALISK_DEN = ()
+    MAKE_LAIR = 3
+    MAKE_HYDRALISK_DEN = 4
     # MAKE_LURKER_DEN = ()
-    MAKE_INFESTATION_PIT = ()
-    MAKE_SPIRE = ()
+    MAKE_INFESTATION_PIT = 5
+    MAKE_SPIRE = 6
     # MAKE_NYDUS_NETWORK = ()
-    MAKE_HIVE = ()
-    MAKE_ULTRALISK_CAVERN = ()
+    MAKE_HIVE = 7
+    MAKE_ULTRALISK_CAVERN = 8
     # MAKE_GREATER_SPIRE = ()
 
 
-class MiscAction(AutoNumber):
-    NO_OP = ()
-    SCOUT_ONCE = ()
+TECH_UNITS_MAPPING = {
+    TechAction.MAKE_SPAWNING_POOL: UNITS[UnitID.SpawningPool].unit_id,
+    TechAction.MAKE_ROACH_WARREN: UNITS[UnitID.RoachWarren].unit_id,
+    TechAction.MAKE_LAIR: UNITS[UnitID.Lair].unit_id,
+    TechAction.MAKE_HYDRALISK_DEN: UNITS[UnitID.HydraliskDen].unit_id,
+    TechAction.MAKE_INFESTATION_PIT: UNITS[UnitID.InfestationPit].unit_id,
+    TechAction.MAKE_SPIRE: UNITS[UnitID.Spire].unit_id,
+    TechAction.MAKE_HIVE: UNITS[UnitID.Hive].unit_id,
+    TechAction.MAKE_ULTRALISK_CAVERN: UNITS[UnitID.UltraliskCavern].unit_id,
+}
+
+
+class MiscAction(enum.IntEnum):
+    NO_OP = 0
+    SCOUT_ONCE = 1
+
+
+# Mineral-to-gas ratio
+class ResourcesAction(enum.IntEnum):
+    MG_RATIO_000 = 0
+    MG_RATIO_025 = 1
+    MG_RATIO_050 = 2
+    MG_RATIO_075 = 3
+    MG_RATIO_100 = 4
+
+
+RESOURCES_RATIO_MAPPING = {
+    ResourcesAction.MG_RATIO_000: 0.00,
+    ResourcesAction.MG_RATIO_025: 0.25,
+    ResourcesAction.MG_RATIO_050: 0.50,
+    ResourcesAction.MG_RATIO_075: 0.75,
+    ResourcesAction.MG_RATIO_100: 1.00,
+}
 

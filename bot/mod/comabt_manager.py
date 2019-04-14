@@ -18,42 +18,41 @@ class CombatManager(LowLevelModule):
     def __init__(self, global_info):
         super().__init__(global_info)
 
-        self.queued = []
-        self.target = point.Point(0, 0)
-        self.attack_mode = True
-        self.target_changed = False
+        self._target = point.Point(0, 0)
+        self._attack_mode = True
+        self._target_changed = False
 
-        self.annihilate_mode = False
-        self.last_annihilate_target = None
+        self._annihilate_mode = False
+        self._last_annihilate_target = None
 
     def set_attack_tar(self, target):
-        if self.attack_mode and self.target == target and not self.annihilate_mode:
+        if self._attack_mode and self._target == target and not self._annihilate_mode:
             return
 
-        self.target = target
-        self.attack_mode = True
-        self.annihilate_mode = False
-        self.target_changed = True
+        self._target = target
+        self._attack_mode = True
+        self._annihilate_mode = False
+        self._target_changed = True
 
     def set_move_tar(self, target):
-        if not self.attack_mode and self.target == target and not self.annihilate_mode:
+        if not self._attack_mode and self._target == target and not self._annihilate_mode:
             return
 
-        self.target = target
-        self.attack_mode = False
-        self.annihilate_mode = False
-        self.target_changed = True
+        self._target = target
+        self._attack_mode = False
+        self._annihilate_mode = False
+        self._target_changed = True
 
     def try_annihilate(self):
-        if self.annihilate_mode:
+        if self._annihilate_mode:
             return
-        self.annihilate_mode = True
-        self.target_changed = True
+        self._annihilate_mode = True
+        self._target_changed = True
 
     def _get_free_combat_units(self, units):
 
-        if self.target_changed:
-            self.target_changed = False
+        if self._target_changed:
+            self._target_changed = False
             # Return units regardless of current order
             return [
                 u.tag for u in units if u.alliance == Alliance.Self
@@ -76,28 +75,28 @@ class CombatManager(LowLevelModule):
         if len(to_be_controlled) == 0:
             return None
 
-        if not self.annihilate_mode:
-            if self.attack_mode:
-                planned_action = FUNCTIONS.Attack_raw_pos("now", self.target, to_be_controlled)
+        if not self._annihilate_mode:
+            if self._attack_mode:
+                planned_action = FUNCTIONS.Attack_raw_pos("now", self._target, to_be_controlled)
             else:
-                planned_action = FUNCTIONS.Move_raw_pos("now", self.target, to_be_controlled)
+                planned_action = FUNCTIONS.Move_raw_pos("now", self._target, to_be_controlled)
 
         else:
             buildings = get_all_enemy(units, ALL_BUILDING_ID)
             if len(buildings) > 0:
                 # CHARGE!
-                if self.last_annihilate_target is None or buildings[0] != self.last_annihilate_target:
-                    self.last_annihilate_target = buildings[0]
-                    self.target_changed = True
+                if self._last_annihilate_target is None or buildings[0] != self._last_annihilate_target:
+                    self._last_annihilate_target = buildings[0]
+                    self._target_changed = True
                     planned_action = FUNCTIONS.Attack_raw_pos("now", buildings[0].pos, to_be_controlled)
             else:
                 # Units will also do
                 enemy_units = [u for u in units if u.alliance == Alliance.Enemy]
                 if len(enemy_units) > 0:
-                    if self.last_annihilate_target is None or enemy_units[0] != self.last_annihilate_target:
-                        self.last_annihilate_target = enemy_units[0]
-                        self.target_changed = True
-                        planned_action = FUNCTIONS.Attack_raw_pos("now", buildings[0].pos, to_be_controlled)
+                    if self._last_annihilate_target is None or enemy_units[0] != self._last_annihilate_target:
+                        self._last_annihilate_target = enemy_units[0]
+                        self._target_changed = True
+                        planned_action = FUNCTIONS.Attack_raw_pos("now", enemy_units[0].pos, to_be_controlled)
                 else:
                     # Search those bastard, send one only
                     planned_action = FUNCTIONS.Attack_raw_pos("now", random.choice(expansions).pos,

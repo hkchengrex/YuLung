@@ -10,6 +10,8 @@ from bot.mod.worker_manager import WorkerManager
 from bot.util.helper import *
 from bot.util.static_units import *
 
+from bot.macro_actions import *
+
 
 class Hypervisor:
     """
@@ -45,36 +47,75 @@ class Hypervisor:
         self.queen_usage = 0
         self.last_queen_iter = 0
 
+    @staticmethod
+    def get_macro_action_spec():
+        return {'discrete': [
+            len(CombatAction),
+            len(ConstructionAction),
+            len(TechAction),
+            len(MiscAction),
+            len(ResourcesAction),
+        ],
+            'continuous': []}
+
     def process(self, macro_action, obs):
         units, units_tag_dict = self.global_info.update(obs)
 
-        # # Init might not be done using gym environment
-        # if len(units) == 0:
-        #     print('Initialization')
-        #     return None
-        #
-        # print(units)
+        """
+        Some initialization steps
+        """
+        hatchery_build_pos, queens_to_be_build = self.expan_man.update_expansion(units, units_tag_dict)
 
         """
         Applying macro actions
         """
-        action = {"discrete_output": macro_action[0].astype(int), "continous_output": macro_action[1]}
+        discrete_input = macro_action[0]
+        # continuous_input = macro_action[1]
 
-        action_id = action["discrete_output"][0]
-        action_act = action["discrete_output"][1]
-        unit_id = action["discrete_output"][2]
-        x = action["discrete_output"][3]
-        y = action["discrete_output"][4]
-        temp = action["continous_output"][0]
+        comb_action = CombatAction(discrete_input[0])
+        cons_action = ConstructionAction(discrete_input[1])
+        tech_action = TechAction(discrete_input[2])
+        misc_action = MiscAction(discrete_input[3])
+        reso_action = ResourcesAction(discrete_input[4])
 
-        # print('Macro action', action_id, action_act, x, y, temp)
+        # Combat resolution
+        if comb_action < CombatAction.MOVE_EXP_0:
+            self.comba_man.set_attack_tar(self.expan_man.expansion[comb_action].pos)
+        elif comb_action < CombatAction.ELIMINATE:
+            self.comba_man.set_attack_tar(self.expan_man.expansion[comb_action-CombatAction.MOVE_EXP_0].pos)
+        else:
+            self.comba_man.try_annihilate()
+
+        # Construction resolution
+        if cons_action != ConstructionAction.NO_OP:
+            if cons_action == ConstructionAction.BUILD_EXPANSION:
+                self.expan_man.claim_expansion(self.expan_man.get_next_expansion())
+            elif cons_action == ConstructionAction.BUILD_EXTRACTOR:
+                # Build only when none is being built, otherwise it will be buggy
+                if self.produ_man.get_count_pending(UNITS[UnitID.Extractor]) == 0:
+                    if self.expan_man.main_expansion() is not None:
+                        next_gas = self.expan_man.get_next_gas(units)
+                        if next_gas is not None:
+                            self.produ_man.build_asap(UNITS[UnitID.Extractor], pos=next_gas)
+            else:
+                self.produ_man.build_units_with_checking(CONSTRUCTION_UNITS_MAPPING[cons_action])
+
+        # Tech resolution
+        if tech_action != TechAction.NO_OP:
+            self.tech_man.enable_tech(TECH_UNITS_MAPPING[tech_action])
+
+        # Misc resolution
+        if misc_action == MiscAction.SCOUT_ONCE:
+            self.scout_man.go_scout_once()
+
+        # Resources resolution
+        mineral_worker_ratio = RESOURCES_RATIO_MAPPING[reso_action]
 
         """
         Routine update within hypervisor and low-level modules
         """
 
         # Hatchery / queen build request from expansion manager, just do it
-        hatchery_build_pos, queens_to_be_build = self.expan_man.update_expansion(units, units_tag_dict)
         for pos in hatchery_build_pos:
             self.produ_man.build_asap(UNITS[UnitID.Hatchery], pos)
         if queens_to_be_build > 0:
@@ -103,13 +144,13 @@ class Hypervisor:
         self.local_iter += 1
         self.global_iter += 1
         if self.local_iter % 100 == 0:
-            print('Comba usage: %d' % self.comba_usage)
-            print('Produ usage: %d' % self.produ_usage)
-            print('Work  usage: %d' % self.work_usage)
-            print('Scout usage: %d' % self.scout_usage)
-            print('Queen usage: %d' % self.scout_usage)
-            print('Idle:        %d' % (self.local_iter-self.comba_usage-self.produ_usage
-                                       -self.work_usage-self.scout_usage-self.queen_usage))
+            # print('Comba usage: %d' % self.comba_usage)
+            # print('Produ usage: %d' % self.produ_usage)
+            # print('Work  usage: %d' % self.work_usage)
+            # print('Scout usage: %d' % self.scout_usage)
+            # print('Queen usage: %d' % self.scout_usage)
+            # print('Idle:        %d' % (self.local_iter-self.comba_usage-self.produ_usage
+            #                            -self.work_usage-self.scout_usage-self.queen_usage))
 
             self.local_iter = self.comba_usage = self.produ_usage \
                 = self.work_usage = self.scout_usage = self.queen_usage = 0
@@ -120,8 +161,7 @@ class Hypervisor:
             self.comba_usage += 1
             return action
 
-        ratio = 1
-        action = self.work_man.assign(units, self.expan_man.expansion, ratio)
+        action = self.work_man.assign(units, self.expan_man.expansion, mineral_worker_ratio)
         if action is not None:
             self.work_usage += 1
             return action

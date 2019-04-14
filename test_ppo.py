@@ -176,7 +176,11 @@ def main():
 
             ####
             # Obser reward and next obs
-            action = {"discrete_output": dis_action.cpu().numpy(), "continous_output": con_action.cpu().numpy()}
+            if con_action is None:
+                action = {"discrete_output": dis_action.cpu().numpy()}
+            else:
+                action = {"discrete_output": dis_action.cpu().numpy(),
+                          "continuous_output": con_action.cpu().numpy()}
             obs, reward, done, infos = envs.step(action)
             ####
 

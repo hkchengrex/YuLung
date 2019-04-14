@@ -162,7 +162,7 @@ class YuLungEnv(gym.Env):
     def _get_action_space(self):
         self.action_transform = ActionTransform()
         space = spaces.Dict({
-            "continous_output": spaces.Box(low=self.action_transform.low, high=self.action_transform.high,
+            "continuous_output": spaces.Box(low=self.action_transform.low, high=self.action_transform.high,
                                            dtype=np.int32),
             "discrete_output": spaces.MultiDiscrete(self.action_transform.discrete_space)
         })
@@ -204,8 +204,8 @@ class YuLungSimple64Env(YuLungEnv):
     def __init__(self, **kwargs):
         super().__init__(
             map_name='Simple64',
-            visualize=False,
-            step_mul = 8,
+            visualize=True,
+            step_mul=8,
             agent_interface_format = sc2_env.parse_agent_interface_format(
                 feature_screen=84,
                 feature_minimap=25,

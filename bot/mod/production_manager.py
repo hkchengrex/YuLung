@@ -35,6 +35,34 @@ class ProductionManager(LowLevelModule):
     def build_asap(self, unit_type: UnitType, pos=None, amount=1):
         self.units_pending.extend([{'type': unit_type, 'pos': pos}] * amount)
 
+    def build_units_with_checking(self, unit_type: UnitType, amount=1):
+        if self.global_info.can_afford_unit(unit_type):
+
+            # Check tech requirement
+            if unit_type in [UNITS[UnitID.Zergling], UNITS[UnitID.Queen]]:
+                if self.global_info.check_if_unit_exist(UNITS[UnitID.SpawningPool]):
+                    self.units_pending.extend([{'type': unit_type, 'pos': None}] * amount)
+
+            elif unit_type == UNITS[UnitID.Roach]:
+                if self.global_info.check_if_unit_exist(UNITS[UnitID.RoachWarren]):
+                    self.units_pending.extend([{'type': unit_type, 'pos': None}] * amount)
+
+            elif unit_type == UNITS[UnitID.Hydralisk]:
+                if self.global_info.check_if_unit_exist(UNITS[UnitID.HydraliskDen]):
+                    self.units_pending.extend([{'type': unit_type, 'pos': None}] * amount)
+
+            elif unit_type in [UNITS[UnitID.Mutalisk], UNITS[UnitID.Corruptor]]:
+                if self.global_info.check_if_unit_exist(UNITS[UnitID.Spire]):
+                    self.units_pending.extend([{'type': unit_type, 'pos': None}] * amount)
+
+            elif unit_type == UNITS[UnitID.Ultralisk]:
+                if self.global_info.check_if_unit_exist(UNITS[UnitID.UltraliskCavern]):
+                    self.units_pending.extend([{'type': unit_type, 'pos': None}] * amount)
+
+            elif unit_type == UNITS[UnitID.Overseer]:
+                if self.global_info.check_if_unit_exist(UNITS[UnitID.Lair]):
+                    self.units_pending.extend([{'type': unit_type, 'pos': None}] * amount)
+
     def record_build(self, pending):
 
         if pending['type'] in ZERG_OVERSEER_LORD:
@@ -132,7 +160,8 @@ class ProductionManager(LowLevelModule):
                             self.update_ongoing_construction(units_tag_dict)
                             return planned_action
                     else:
-                        print('No usable drones!')
+                        pass
+                        # print('No usable drones!')
 
                 elif unit_type == UNITS[UnitID.Queen]:
                     bases = get_all_owned(units, ZERG_BASES)
