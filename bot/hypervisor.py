@@ -55,6 +55,7 @@ class Hypervisor:
             len(TechAction),
             len(MiscAction),
             len(ResourcesAction),
+            len(ConstructAmountAction),
         ],
             'continuous': []}
 
@@ -77,6 +78,7 @@ class Hypervisor:
         tech_action = TechAction(discrete_input[2])
         misc_action = MiscAction(discrete_input[3])
         reso_action = ResourcesAction(discrete_input[4])
+        amou_action = ConstructAmountAction(discrete_input[5])
 
         # After 2000 steps (around 12 minutes, FORCE ANNIHILATION!!!)
         if self.global_iter < 2000:
@@ -102,7 +104,8 @@ class Hypervisor:
                         if next_gas is not None:
                             self.produ_man.build_asap(UNITS[UnitID.Extractor], pos=next_gas)
             else:
-                self.produ_man.build_units_with_checking(CONSTRUCTION_UNITS_MAPPING[cons_action])
+                self.produ_man.build_units_with_checking(CONSTRUCTION_UNITS_MAPPING[cons_action],
+                                                         amount=CONSTRUCT_AMOUNT_MAPPING[amou_action])
 
         # Tech resolution
         if tech_action != TechAction.NO_OP:

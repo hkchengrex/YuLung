@@ -105,3 +105,15 @@ RESOURCES_RATIO_MAPPING = {
     ResourcesAction.MG_RATIO_100: 1.00,
 }
 
+
+class ConstructAmountAction(enum.IntEnum):
+    BUILD_1 = 0
+    BUILD_3 = 1
+    BUILD_5 = 2
+
+
+CONSTRUCT_AMOUNT_MAPPING = {
+    ConstructAmountAction.BUILD_1: 1,
+    ConstructAmountAction.BUILD_3: 3,
+    ConstructAmountAction.BUILD_5: 5,
+}

@@ -32,8 +32,8 @@ class ProductionManager(LowLevelModule):
         # self.working_larva_list = []
         self.ongoing_construction = []
 
-    def _extend_queue(self, unit_type: UnitType, pos=None, amount=1):
-        self.units_pending.extend([{'type': unit_type, 'pos': pos, 'life': 30}] * amount)
+    def _extend_queue(self, unit_type: UnitType, pos=None, amount=1, life=10000):
+        self.units_pending.extend([{'type': unit_type, 'pos': pos, 'life': life}] * amount)
 
     def build_asap(self, unit_type: UnitType, pos=None, amount=1):
         self._extend_queue(unit_type, pos, amount)
@@ -55,30 +55,30 @@ class ProductionManager(LowLevelModule):
             # Check tech requirement
             if unit_type in [UNITS[UnitID.Zergling], UNITS[UnitID.Queen]]:
                 if self.global_info.check_if_unit_exist(UNITS[UnitID.SpawningPool]):
-                    self._extend_queue(unit_type, None, amount)
+                    self._extend_queue(unit_type, None, amount, life=30)
 
             elif unit_type == UNITS[UnitID.Roach]:
                 if self.global_info.check_if_unit_exist(UNITS[UnitID.RoachWarren]):
-                    self._extend_queue(unit_type, None, amount)
+                    self._extend_queue(unit_type, None, amount, life=30)
 
             elif unit_type == UNITS[UnitID.Hydralisk]:
                 if self.global_info.check_if_unit_exist(UNITS[UnitID.HydraliskDen]):
-                    self._extend_queue(unit_type, None, amount)
+                    self._extend_queue(unit_type, None, amount, life=30)
 
             elif unit_type in [UNITS[UnitID.Mutalisk], UNITS[UnitID.Corruptor]]:
                 if self.global_info.check_if_unit_exist(UNITS[UnitID.Spire]):
-                    self._extend_queue(unit_type, None, amount)
+                    self._extend_queue(unit_type, None, amount, life=30)
 
             elif unit_type == UNITS[UnitID.Ultralisk]:
                 if self.global_info.check_if_unit_exist(UNITS[UnitID.UltraliskCavern]):
-                    self._extend_queue(unit_type, None, amount)
+                    self._extend_queue(unit_type, None, amount, life=30)
 
             elif unit_type == UNITS[UnitID.Overseer]:
                 if self.global_info.check_if_unit_exist(UNITS[UnitID.Lair]):
-                    self._extend_queue(unit_type, None, amount)
+                    self._extend_queue(unit_type, None, amount, life=30)
 
             else:
-                self._extend_queue(unit_type, None, amount)
+                self._extend_queue(unit_type, None, amount, life=30)
 
     def record_build(self, pending):
 
@@ -126,8 +126,8 @@ class ProductionManager(LowLevelModule):
                             # self.working_larva_list.append(selected_larva)
                             planned_action = get_raw_quick_action_id(unit_type.ability_id)("now", [selected_larva.tag])
                             return planned_action
-                        else:
-                            self.logger.log_game_verbose('Tried to morph: ' + unit_type.name + ' but we cannot.')
+                        # else:
+                        #     self.logger.log_game_verbose('Tried to morph: ' + unit_type.name + ' but we cannot.')
 
                 elif unit_type in FROM_DRONE_TYPE:
                     # Don't take the drones that have missions
@@ -136,52 +136,53 @@ class ProductionManager(LowLevelModule):
                     if len(usable_drones) > 0:
                         # Pick drone
                         selected_drone = random.choice(usable_drones)  # type: Unit
+                        avail_abilities = query_available_abilities(self.sc2_env, selected_drone.tag)
+                        if unit_type.ability_id in avail_abilities:
+                            if type(pos) != Unit:
+                                # Pick location
+                                if pos is None:
+                                    for _ in range(10):
+                                        if len(self.base_locations) == 0:
+                                            return
+                                        base_loc = random.choice(self.base_locations)
+                                        ran_x = random.randint(-10, 11)*100 + base_loc.x
+                                        ran_y = random.randint(-10, 11)*100 + base_loc.y
+                                        build_pos = point.Point(ran_x, ran_y)
+                                        result = query_building_placement(self.sc2_env, unit_type.ability_id, build_pos)
+                                        if result == 1:
+                                            break
+                                else:
+                                    # Try 11x11 shift, from center orderly
+                                    for (i, j) in grid_ordering.order_5:
+                                        build_pos = point.Point(pos.x+i*100+50, pos.y+j*100+50)
+                                        result = query_building_placement(self.sc2_env, unit_type.ability_id, build_pos)
+                                        if result == 1:
+                                            break
 
-                        if type(pos) != Unit:
-                            # Pick location
-                            if pos is None:
-                                for _ in range(10):
-                                    if len(self.base_locations) == 0:
-                                        return
-                                    base_loc = random.choice(self.base_locations)
-                                    ran_x = random.randint(-10, 11)*100 + base_loc.x
-                                    ran_y = random.randint(-10, 11)*100 + base_loc.y
-                                    build_pos = point.Point(ran_x, ran_y)
-                                    result = query_building_placement(self.sc2_env, unit_type.ability_id, build_pos)
-                                    if result == 1:
-                                        break
+                                # 1 = Success,
+                                # See https://github.com/Blizzard/s2client-proto/blob/master/s2clientprotocol/error.proto
+                                if result == 1:
+                                    self.record_build(pending)
+                                    selected_drone.has_ongoing_action = True
+                                    selected_drone.action_detail = pending
+                                    self.working_drone_list.append(selected_drone)
+                                    planned_action = get_raw_pos_action_id(unit_type.ability_id)(
+                                        "now", build_pos, [selected_drone.tag])
+                                    self.update_ongoing_construction(units_tag_dict)
+                                    return planned_action
+                                else:
+                                    print('Failed to build at ', str(build_pos))
+
                             else:
-                                # Try 11x11 shift, from center orderly
-                                for (i, j) in grid_ordering.order_5:
-                                    build_pos = point.Point(pos.x+i*100+50, pos.y+j*100+50)
-                                    result = query_building_placement(self.sc2_env, unit_type.ability_id, build_pos)
-                                    if result == 1:
-                                        break
-
-                            # 1 = Success,
-                            # See https://github.com/Blizzard/s2client-proto/blob/master/s2clientprotocol/error.proto
-                            if result == 1:
+                                # Targeted build, like extractors
                                 self.record_build(pending)
                                 selected_drone.has_ongoing_action = True
                                 selected_drone.action_detail = pending
                                 self.working_drone_list.append(selected_drone)
-                                planned_action = get_raw_pos_action_id(unit_type.ability_id)(
-                                    "now", build_pos, [selected_drone.tag])
+                                planned_action = get_raw_targeted_action_id(unit_type.ability_id)(
+                                    "now", pos.tag, [selected_drone.tag])
                                 self.update_ongoing_construction(units_tag_dict)
                                 return planned_action
-                            else:
-                                print('Failed to build at ', str(build_pos))
-
-                        else:
-                            # Targeted build, like extractors
-                            self.record_build(pending)
-                            selected_drone.has_ongoing_action = True
-                            selected_drone.action_detail = pending
-                            self.working_drone_list.append(selected_drone)
-                            planned_action = get_raw_targeted_action_id(unit_type.ability_id)(
-                                "now", pos.tag, [selected_drone.tag])
-                            self.update_ongoing_construction(units_tag_dict)
-                            return planned_action
                     else:
                         pass
                         # print('No usable drones!')

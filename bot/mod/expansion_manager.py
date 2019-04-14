@@ -183,7 +183,6 @@ class ExpansionManager(LowLevelModule):
             """
 
             if exp.ownership == Alliance.Self:
-                # Assume that our expansions are always ours. Bold claim though.
 
                 # Build hatchery if we haven't
                 if exp.base is None and not exp.base_queued:

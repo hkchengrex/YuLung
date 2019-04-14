@@ -98,9 +98,11 @@ class CombatManager(LowLevelModule):
                         self._target_changed = True
                         planned_action = FUNCTIONS.Attack_raw_pos("now", enemy_units[0].pos, to_be_controlled)
                 else:
-                    # Search those bastard, send one only
+                    # Search those bastard, send some
+                    if len(to_be_controlled) > 10:
+                        to_be_controlled = random.choices(to_be_controlled, k=int(len(to_be_controlled)*0.2))
                     planned_action = FUNCTIONS.Attack_raw_pos("now", random.choice(expansions).pos,
-                                                              to_be_controlled[0:1])
+                                                                to_be_controlled)
 
         return planned_action
 
