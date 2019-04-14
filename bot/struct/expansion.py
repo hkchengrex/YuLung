@@ -50,4 +50,3 @@ class Expansion:
 
     def reset(self):
         self.base = None
-        self.base_queued = False

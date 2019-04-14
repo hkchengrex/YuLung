@@ -2,6 +2,9 @@ import enum
 from bot.util.static_units import *
 
 
+NUMBER_EXPANSIONS = 4
+
+
 class CombatAction(enum.IntEnum):
     ATTACK_EXP_0 = 0
     ATTACK_EXP_1 = 1

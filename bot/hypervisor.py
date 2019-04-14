@@ -61,6 +61,20 @@ class Hypervisor:
         ],
             'continuous': []}
 
+    def get_observation(self):
+        return {
+            'expansions': [alliance_to_id[ex.ownership] for ex in self.expan_man.expansion],
+            'tech': self.tech_man.tech_list,
+            'scout': self.scout_man.enemy_tech,
+            'extractors': len(get_all_owned(self.global_info.consistent_units.units, UNITS[UnitID.Extractor])),
+            'time': self.global_iter,
+            'drone': self.work_man.get_deficiency(self.global_info.consistent_units.units, self.expan_man.expansion),
+            'minerals': self.global_info.resources.mineral,
+            'gas': self.global_info.resources.vespene,
+            'food_usage': self.global_info.resources.food_used,
+            'food_cap': self.global_info.resources.food_cap
+        }
+
     def process(self, macro_action, obs):
         units, units_tag_dict = self.global_info.update(obs)
 

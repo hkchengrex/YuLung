@@ -64,7 +64,7 @@ class YuLungEnv(gym.Env):
         obs = self._env.step([actions.FunctionCall(FUNCTIONS.no_op.id, [])])[0]
         self.obs = obs
 
-        return self._process_obs(obs)
+        return self._process_obs(obs, None)
 
     def get_agent(self):
         if self.agent is None:
@@ -82,6 +82,8 @@ class YuLungEnv(gym.Env):
             action = self.agent.step(self.obs)
             self.obs = self._env.step([action])[0]
             self.agent.set_macro_action(None)
+            if self.obs.step_type == StepType.LAST:
+                break
 
         self.available_actions = self.obs.observation.available_actions
         self._epi_reward += self.obs.reward
@@ -93,7 +95,7 @@ class YuLungEnv(gym.Env):
         reward = self.obs.reward
         done = self.obs.step_type == StepType.LAST
 
-        obs = self._process_obs(self.obs)
+        obs = self._process_obs(self.obs, self.agent.hypervisor.get_observation())
 
         return obs, reward, done, {}
 
@@ -124,9 +126,9 @@ class YuLungEnv(gym.Env):
     #         logger.info("Episode %d ended with reward %d after %d steps.",
     #                     self._episode, self._epi_reward, self._num_step)
 
-    def _process_obs(self, obs):
+    def _process_obs(self, obs, extra_obs):
         # obs = np.zeros(self.observation_space.shape)
-        screens, discrete_info = self.feature_transform.transform(obs)
+        screens, discrete_info = self.feature_transform.transform(obs, extra_obs)
         return {"feature_screen": screens,
                 "info_discrete": discrete_info,
                 }

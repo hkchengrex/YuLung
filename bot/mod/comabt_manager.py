@@ -87,7 +87,6 @@ class CombatManager(LowLevelModule):
         else:
             buildings = get_all_enemy(units, ALL_BUILDING_ID)
             if len(buildings) > 0:
-                print('Got building', buildings[0].pos)
                 # CHARGE!
                 if self._last_annihilate_target is None or buildings[0] != self._last_annihilate_target:
                     # Sees a new building, let's move everyone
@@ -102,7 +101,6 @@ class CombatManager(LowLevelModule):
                 # Units will also do
                 enemy_units = [u for u in units if u.alliance == Alliance.Enemy]
                 if len(enemy_units) > 0:
-                    print('Got unit', enemy_units[0].pos)
                     if self._last_annihilate_target is None or enemy_units[0] != self._last_annihilate_target:
                         self._last_annihilate_target = enemy_units[0]
                         self._target_changed = True
@@ -115,7 +113,6 @@ class CombatManager(LowLevelModule):
                     # Search those bastard, send some
                     if len(to_be_controlled) > 10:
                         to_be_controlled = random.choices(to_be_controlled, k=int(len(to_be_controlled)*0.2))
-                    print('Got nothing', len(to_be_controlled))
                     planned_action = FUNCTIONS.Attack_raw_pos("now", random.choice(expansions).pos,
                                                                 to_be_controlled)
 

@@ -26,6 +26,9 @@ from pysc2.lib import actions, features
 from pysc2.env import sc2_env
 import envs
 
+from feature.py_feature import FeatureTransform
+from bot.macro_actions import NUMBER_EXPANSIONS
+
 
 def main():
     args = get_args()
@@ -59,12 +62,19 @@ def main():
     # b. scale (For categorical, it is the number of classes, for scalar it is used to
     #    perform log transform as in Pysc2 paper)
     # (Other Just Fill Anythings)
-    screen_0 = features.Feature(type=features.FeatureType.CATEGORICAL, scale=6, name="", layer_set=None, full_name=None,
-                                palette=None, clip=False
-                                , index=0)
-    screen_1 = features.Feature(type=features.FeatureType.SCALAR, scale=3, name="", layer_set=None, full_name=None,
-                                palette=None, clip=False
-                                , index=0)
+    screen_0 = features.SCREEN_FEATURES.height_map
+    screen_1 = features.SCREEN_FEATURES.visibility_map
+    screen_2 = features.SCREEN_FEATURES.creep
+    screen_3 = features.SCREEN_FEATURES.player_relative
+    screen_4 = features.SCREEN_FEATURES.unit_density_aa
+    screen_5 = features.SCREEN_FEATURES.unit_hit_points
+
+    # screen_0 = features.Feature(type=features.FeatureType.CATEGORICAL, scale=6, name="", layer_set=None, full_name=None,
+    #                             palette=None, clip=False
+    #                             , index=0)
+    # screen_1 = features.Feature(type=features.FeatureType.SCALAR, scale=3, name="", layer_set=None, full_name=None,
+    #                             palette=None, clip=False
+    #                             , index=0)
 
     # Define the Info Observation Space
     # Required Field
@@ -73,11 +83,22 @@ def main():
     # [2]. scale (For categorical, it is the number of classes, it is used to
     #    perform log transform as in Pysc2 paper)
 
-    info_discrete_0 = SVSpec(features.FeatureType.CATEGORICAL, 0, 5)
-    info_scalar_1 = SVSpec(features.FeatureType.SCALAR, 1, 1.)
-    info_scalar_2 = SVSpec(features.FeatureType.SCALAR, 2, 1.)
-    info_scalar_3 = SVSpec(features.FeatureType.SCALAR, 3, 1.)
-    info_scalar_4 = SVSpec(features.FeatureType.SCALAR, 4, 1.)
+    info_discrete = []
+    for i in range(FeatureTransform.n_non_screen_cate()):
+        if i < NUMBER_EXPANSIONS:
+            info_discrete.append(SVSpec(features.FeatureType.CATEGORICAL, i, 3))
+        else:
+            info_discrete.append(SVSpec(features.FeatureType.CATEGORICAL, i, 2))
+
+    info_scalar = [
+        SVSpec(features.FeatureType.SCALAR, 0 + len(info_discrete), 24),
+        SVSpec(features.FeatureType.SCALAR, 1 + len(info_discrete), 3000),
+        SVSpec(features.FeatureType.SCALAR, 2 + len(info_discrete), 30),
+        SVSpec(features.FeatureType.SCALAR, 3 + len(info_discrete), 5000),
+        SVSpec(features.FeatureType.SCALAR, 4 + len(info_discrete), 3000),
+        SVSpec(features.FeatureType.SCALAR, 5 + len(info_discrete), 200),
+        SVSpec(features.FeatureType.SCALAR, 6 + len(info_discrete), 200),
+    ]
 
     # ####
 
@@ -85,12 +106,8 @@ def main():
         envs.observation_space,
         envs.action_space,
         # (obs) Copy the above definition to this ##
-        [screen_0, screen_1],
-        [info_discrete_0,
-         info_scalar_1,
-         info_scalar_2,
-         info_scalar_3,
-         info_scalar_4],
+        [screen_0, screen_1, screen_2, screen_3, screen_4, screen_5],
+        info_discrete + info_scalar,
         # ####
         base_kwargs={'recurrent': args.recurrent_policy})
     actor_critic.to(device)

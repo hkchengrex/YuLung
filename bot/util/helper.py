@@ -80,6 +80,8 @@ _sc2_to_ours_reverse_id = {}
 for _, u in UNITS.items():
     _sc2_to_ours_reverse_id[u.unit_id] = u
 
+alliance_to_id = {Alliance.Self:0, Alliance.Neutral:1, Alliance.Enemy:2}
+
 
 def rev_id2type(unit_id: int) -> UnitType:
     return _sc2_to_ours_reverse_id[unit_id]
