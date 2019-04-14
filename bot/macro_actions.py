@@ -56,21 +56,23 @@ class TechAction(enum.IntEnum):
     NO_OP = 0
 
     MAKE_SPAWNING_POOL = 1
-    MAKE_ROACH_WARREN = 2
+    MAKE_EVOLUTION_CHAMBER = 2
+    MAKE_ROACH_WARREN = 3
     # MAKE_BANELING_NEST = ()
-    MAKE_LAIR = 3
-    MAKE_HYDRALISK_DEN = 4
+    MAKE_LAIR = 4
+    MAKE_HYDRALISK_DEN = 5
     # MAKE_LURKER_DEN = ()
-    MAKE_INFESTATION_PIT = 5
-    MAKE_SPIRE = 6
+    MAKE_INFESTATION_PIT = 6
+    MAKE_SPIRE = 7
     # MAKE_NYDUS_NETWORK = ()
-    MAKE_HIVE = 7
-    MAKE_ULTRALISK_CAVERN = 8
+    MAKE_HIVE = 8
+    MAKE_ULTRALISK_CAVERN = 9
     # MAKE_GREATER_SPIRE = ()
 
 
 TECH_UNITS_MAPPING = {
     TechAction.MAKE_SPAWNING_POOL: UNITS[UnitID.SpawningPool].unit_id,
+    TechAction.MAKE_EVOLUTION_CHAMBER: UNITS[UnitID.EvolutionChamber].unit_id,
     TechAction.MAKE_ROACH_WARREN: UNITS[UnitID.RoachWarren].unit_id,
     TechAction.MAKE_LAIR: UNITS[UnitID.Lair].unit_id,
     TechAction.MAKE_HYDRALISK_DEN: UNITS[UnitID.HydraliskDen].unit_id,

@@ -78,11 +78,15 @@ class Hypervisor:
         misc_action = MiscAction(discrete_input[3])
         reso_action = ResourcesAction(discrete_input[4])
 
-        # Combat resolution
-        if comb_action < CombatAction.MOVE_EXP_0:
-            self.comba_man.set_attack_tar(self.expan_man.expansion[comb_action].pos)
-        elif comb_action < CombatAction.ELIMINATE:
-            self.comba_man.set_attack_tar(self.expan_man.expansion[comb_action-CombatAction.MOVE_EXP_0].pos)
+        # After 2000 steps (around 12 minutes, FORCE ANNIHILATION!!!)
+        if self.global_iter < 2000:
+            # Combat resolution
+            if comb_action < CombatAction.MOVE_EXP_0:
+                self.comba_man.set_attack_tar(self.expan_man.expansion[comb_action].pos)
+            elif comb_action < CombatAction.ELIMINATE:
+                self.comba_man.set_attack_tar(self.expan_man.expansion[comb_action-CombatAction.MOVE_EXP_0].pos)
+            else:
+                self.comba_man.try_annihilate()
         else:
             self.comba_man.try_annihilate()
 
@@ -166,7 +170,13 @@ class Hypervisor:
             self.work_usage += 1
             return action
 
-        action = self.produ_man.update(units, units_tag_dict)
+        print([u['type'].name for u in self.produ_man.units_pending])
+
+        if self.expan_man.main_expansion() is not None:
+            main_base = self.expan_man.main_expansion().base
+        else:
+            main_base = None
+        action = self.produ_man.update(units, units_tag_dict, main_base)
         self.produ_man.update_ongoing_construction(units_tag_dict)
         if action is not None:
             self.produ_usage += 1
