@@ -64,7 +64,6 @@ class FeatureTransform:
                         + [extra_obs['time']] + [extra_obs['drone']] \
                         + [extra_obs['minerals']] + [extra_obs['gas']] \
                         + [extra_obs['food_usage']] + [extra_obs['food_cap']]
-            print(infos)
 
             # ####
 

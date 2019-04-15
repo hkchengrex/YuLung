@@ -29,9 +29,31 @@ import envs
 from feature.py_feature import FeatureTransform
 from bot.macro_actions import NUMBER_EXPANSIONS
 
+import logging
+from tensorboardX import SummaryWriter
+import datetime
 
 def main():
     args = get_args()
+
+    full_id = args.expr_id + '_' + datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+
+    logFormatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
+    cf_logger = logging.getLogger()
+
+    cf_logger.handlers = []
+
+    fileHandler = logging.FileHandler("log/{0}.log".format(full_id))
+    fileHandler.setFormatter(logFormatter)
+    fileHandler.setLevel(logging.INFO)
+    cf_logger.addHandler(fileHandler)
+
+    consoleHandler = logging.StreamHandler()
+    consoleHandler.setFormatter(logFormatter)
+    consoleHandler.setLevel(logging.WARNING)
+    cf_logger.addHandler(consoleHandler)
+
+    logger = SummaryWriter(os.path.join('log', full_id))
 
     torch.manual_seed(args.seed)
     torch.cuda.manual_seed_all(args.seed)
@@ -248,12 +270,16 @@ def main():
 
         value_loss, action_loss, dist_entropy = agent.update(rollouts)
 
+        logger.add_scalar('stat/value_loss', value_loss, j)
+        logger.add_scalar('stat/action_loss', action_loss, j)
+        logger.add_scalar('stat/entropy', dist_entropy, j)
+
         rollouts.after_update()
 
         # save for every interval-th episode or for the last epoch
         if (j % args.save_interval == 0
                 or j == num_updates - 1) and args.save_dir != "":
-            save_path = os.path.join(args.save_dir, args.algo)
+            save_path = os.path.join(args.save_dir, full_id + args.algo)
             try:
                 os.makedirs(save_path)
             except OSError:
@@ -262,7 +288,7 @@ def main():
             torch.save([
                 actor_critic,
                 getattr(utils.get_vec_normalize(envs), 'ob_rms', None)
-            ], os.path.join(save_path, args.env_name + ".pt"))
+            ], os.path.join(save_path, args.env_name + '_%d' % j + ".pt"))
 
         if j % args.log_interval == 0 and len(episode_rewards) > 1:
             total_num_steps = (j + 1) * args.num_processes * args.num_steps
@@ -275,6 +301,11 @@ def main():
                         np.median(episode_rewards), np.min(episode_rewards),
                         np.max(episode_rewards), dist_entropy, value_loss,
                         action_loss))
+
+            logger.add_scalar('reward/mean_reward', np.mean(episode_rewards), j)
+            logger.add_scalar('reward/median_reward', np.median(episode_rewards), j)
+            logger.add_scalar('reward/min_reward', np.min(episode_rewards), j)
+            logger.add_scalar('reward/max_reward', np.max(episode_rewards), j)
 
         if (args.eval_interval is not None and len(episode_rewards) > 1
                 and j % args.eval_interval == 0):

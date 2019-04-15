@@ -41,6 +41,7 @@ class YuLungEnv(gym.Env):
         self.agent = None  # type: Optional[YuLungAgent]
 
         self.available_actions = []
+        self.logger = logging.getLogger()
 
         import sys
         from absl import flags
@@ -96,7 +97,16 @@ class YuLungEnv(gym.Env):
         # print(reward)
         done = self.obs.step_type == StepType.LAST or self.agent.hypervisor.global_iter > 3000
 
+        if self.obs.step_type == StepType.LAST:
+            if self.obs.reward > 0.5:
+                self.logger.log(logging.WARNING, '[GAME_RESULT]: WIN')
+            elif self.obs.reward < -0.5:
+                self.logger.log(logging.WARNING, '[GAME_RESULT]: LOSS')
+            else:
+                self.logger.log(logging.WARNING, '[GAME_RESULT]: DRAW')
+
         if self.agent.hypervisor.global_iter > 3000:
+            self.logger.log(logging.WARNING, '[GAME_RESULT]: DRAW')
             reward -= 1
 
         obs = self._process_obs(self.obs, self.agent.hypervisor.get_observation())
