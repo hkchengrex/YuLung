@@ -78,11 +78,11 @@ class YuLungEnv(gym.Env):
 
         self.agent.set_macro_action(macro_action)
 
-        for _ in range(3):
+        for _ in range(6):
             action = self.agent.step(self.obs)
             self.obs = self._env.step([action])[0]
             self.agent.set_macro_action(None)
-            if self.obs.step_type == StepType.LAST or self.agent.hypervisor.global_iter > 2500:
+            if self.obs.step_type == StepType.LAST or self.agent.hypervisor.global_iter > 3000:
                 break
 
         self.available_actions = self.obs.observation.available_actions
@@ -94,9 +94,9 @@ class YuLungEnv(gym.Env):
 
         reward = self.obs.reward + self.agent.hypervisor.get_reward(self.obs)
         # print(reward)
-        done = self.obs.step_type == StepType.LAST or self.agent.hypervisor.global_iter > 2500
+        done = self.obs.step_type == StepType.LAST or self.agent.hypervisor.global_iter > 3000
 
-        if self.agent.hypervisor.global_iter > 2500:
+        if self.agent.hypervisor.global_iter > 3000:
             reward -= 1
 
         obs = self._process_obs(self.obs, self.agent.hypervisor.get_observation())
@@ -211,11 +211,11 @@ class YuLungSimple64Env(YuLungEnv):
     def __init__(self, **kwargs):
         super().__init__(
             map_name='Simple64',
-            visualize=False,
+            visualize=True,
             step_mul=8,
             save_replay_episodes=10,
-            replay_dir='~/sc2_replays',
-            replay_prefix=datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S"),
+            replay_dir=datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S"),
+            replay_prefix='YuLung64',
             agent_interface_format = sc2_env.parse_agent_interface_format(
                 feature_screen=84,
                 feature_minimap=25,

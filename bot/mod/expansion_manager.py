@@ -53,6 +53,9 @@ class ExpansionManager(LowLevelModule):
                 return e
         return None
 
+    def get_unbuilt_expansion_count(self):
+        return len([e for e in self.own_expansion() if e.base is None])
+
     def init_expansion(self, units: List[Unit]):
         """
         - Finds all expansion locations by clustering the resources fields once

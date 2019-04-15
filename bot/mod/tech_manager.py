@@ -24,7 +24,21 @@ class TechManager(LowLevelModule):
         super().__init__(global_info)
         self.tech_list = [False] * len(ZERG_TECH_BUILDINGS)
 
-    def enable_tech(self, unit_id: int):
+    def enable_tech(self, units, unit_id: int, prod_man: ProductionManager):
+
+        # Disable over-tech
+        if unit_id in [UNITS[UnitID.HydraliskDen], UNITS[UnitID.InfestationPit], UNITS[UnitID.Spire]]:
+            if prod_man.get_count_ours_and_pending(units, UNITS[UnitID.HydraliskDen]) == 0:
+                return
+
+        if unit_id == UNITS[UnitID.Hive]:
+            if prod_man.get_count_ours_and_pending(units, UNITS[UnitID.InfestationPit]) == 0:
+                return
+
+        if unit_id == UNITS[UnitID.UltraliskCavern]:
+            if prod_man.get_count_ours_and_pending(units, UNITS[UnitID.Hive]) == 0:
+                return
+
         for i, tech in enumerate(ZERG_TECH_BUILDINGS):
             if unit_id == tech.unit_id:
                 if not self.tech_list[i]:

@@ -49,7 +49,7 @@ class Hypervisor:
 
         self.mineral_worker_ratio = 0.5
 
-        self.last_reward = 0
+        self.last_reward = None
 
     @staticmethod
     def get_macro_action_spec():
@@ -70,7 +70,8 @@ class Hypervisor:
             'scout': self.scout_man.enemy_tech,
             'extractors': len(get_all_owned(self.global_info.consistent_units.units, UNITS[UnitID.Extractor])),
             'time': self.global_iter,
-            'drone': self.work_man.get_deficiency(self.global_info.consistent_units.units, self.expan_man.expansion),
+            'drone': max(self.work_man.get_deficiency(self.global_info.consistent_units.units,
+                                                      self.expan_man.expansion), 0),
             'minerals': self.global_info.resources.mineral,
             'gas': self.global_info.resources.vespene,
             'food_usage': self.global_info.resources.food_used,
@@ -82,10 +83,14 @@ class Hypervisor:
         mineral_adv = sum(obs.observation.score_by_category.killed_minerals-obs.observation.score_by_category.lost_minerals)
         gas_adv = sum(obs.observation.score_by_category.killed_vespene-obs.observation.score_by_category.lost_vespene)
         total_val = obs.observation.score_cumulative.total_value_units
+        mineral_now = self.global_info.resources.mineral
 
-        reward = raw_score/20 + mineral_adv + gas_adv*5 + total_val/5
+        reward = raw_score/20 + mineral_adv/5 + gas_adv/2 + total_val/5 + mineral_now/8
 
         reward = reward/200 ** ((self.global_iter+1000)/3000)
+
+        if self.last_reward is None:
+            self.last_reward = reward
 
         td = reward - self.last_reward
         self.last_reward = reward
@@ -120,19 +125,21 @@ class Hypervisor:
             # After 2000 steps (around 12 minutes, FORCE ANNIHILATION!!!)
             if self.global_iter < 2000:
                 # Combat resolution
-                if comb_action < CombatAction.MOVE_EXP_0:
+                if comb_action < CombatAction.RETREAT:
                     self.comba_man.set_attack_tar(self.expan_man.expansion[comb_action].pos)
-                elif comb_action < CombatAction.ELIMINATE:
-                    self.comba_man.set_attack_tar(self.expan_man.expansion[comb_action-CombatAction.MOVE_EXP_0].pos)
+                elif comb_action == CombatAction.RETREAT:
+                    self.comba_man.set_move_tar(self.global_info.home_pos)
                 else:
                     self.comba_man.try_annihilate()
             else:
+                self.scout_man.go_scout_once()
                 self.comba_man.try_annihilate()
 
             # Construction resolution
             if cons_action != ConstructionAction.NO_OP:
                 if cons_action == ConstructionAction.BUILD_EXPANSION:
-                    self.expan_man.claim_expansion(self.expan_man.get_next_expansion())
+                    if self.expan_man.get_unbuilt_expansion_count() == 0:
+                        self.expan_man.claim_expansion(self.expan_man.get_next_expansion())
                 elif cons_action == ConstructionAction.BUILD_EXTRACTOR:
                     # Build only when none is being built, otherwise it will be buggy
                     if self.produ_man.get_count_pending(UNITS[UnitID.Extractor]) == 0:
@@ -146,7 +153,7 @@ class Hypervisor:
 
             # Tech resolution
             if tech_action != TechAction.NO_OP:
-                self.tech_man.enable_tech(TECH_UNITS_MAPPING[tech_action])
+                self.tech_man.enable_tech(units, TECH_UNITS_MAPPING[tech_action], self.produ_man)
 
             # Misc resolution
             if misc_action == MiscAction.SCOUT_ONCE:

@@ -11,12 +11,9 @@ class CombatAction(enum.IntEnum):
     ATTACK_EXP_2 = 2
     ATTACK_EXP_3 = 3
 
-    MOVE_EXP_0 = 4
-    MOVE_EXP_1 = 5
-    MOVE_EXP_2 = 6
-    MOVE_EXP_3 = 7
+    RETREAT = 4
 
-    ELIMINATE = 8
+    ELIMINATE = 5
 
 
 class ConstructionAction(enum.IntEnum):
@@ -31,13 +28,13 @@ class ConstructionAction(enum.IntEnum):
     BUILD_OVERLORD = 4
     BUILD_ZERGLING = 5
     BUILD_ROACH = 6
-    BUILD_QUEEN = 7
-    BUILD_HYDRALISK = 8
+    # BUILD_QUEEN = 7
+    BUILD_HYDRALISK = 7
     # BUILD_SWARM_HOST = 9
-    BUILD_MUTALISK = 9
-    BUILD_CORRUPTOR = 10
-    BUILD_ULTRALISK = 11
-    BUILD_OVERSEER = 12
+    BUILD_MUTALISK = 8
+    BUILD_CORRUPTOR = 9
+    BUILD_ULTRALISK = 10
+    BUILD_OVERSEER = 11
 
 
 CONSTRUCTION_UNITS_MAPPING = {
@@ -45,7 +42,7 @@ CONSTRUCTION_UNITS_MAPPING = {
     ConstructionAction.BUILD_OVERLORD: UNITS[UnitID.Overlord],
     ConstructionAction.BUILD_ZERGLING: UNITS[UnitID.Zergling],
     ConstructionAction.BUILD_ROACH: UNITS[UnitID.Roach],
-    ConstructionAction.BUILD_QUEEN: UNITS[UnitID.Queen],
+    # ConstructionAction.BUILD_QUEEN: UNITS[UnitID.Queen],
     ConstructionAction.BUILD_HYDRALISK: UNITS[UnitID.Hydralisk],
     # ConstructionAction.BUILD_SWARM_HOST: UNITS[UnitID.SwarmHostMP],
     ConstructionAction.BUILD_MUTALISK: UNITS[UnitID.Mutalisk],

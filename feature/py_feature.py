@@ -48,23 +48,23 @@ class FeatureTransform:
         # (obs) Refer to __init__, input the some observations to NN ##
 
         screens = np.zeros(self.screen_shape, dtype=np.float)
-        infos = np.ones(self.n_info, dtype=np.float)
+        infos = np.zeros(self.n_info, dtype=np.float)
 
         screens[0] = obs.observation.feature_screen.height_map
         screens[1] = obs.observation.feature_screen.visibility_map
         screens[2] = obs.observation.feature_screen.creep
         screens[3] = obs.observation.feature_screen.player_relative
         screens[4] = obs.observation.feature_screen.unit_density_aa
-        screens[5] = obs.observation.feature_screen.unit_hit_points
+        screens[5] = obs.observation.feature_screen.unit_hit_points_ratio
 
-        # if extra_obs is not None:
-        #
-        #     infos[:] = extra_obs['expansions'] + extra_obs['tech'] \
-        #                 + extra_obs['scout'] + [extra_obs['extractors']] \
-        #                 + [extra_obs['time']] + [extra_obs['drone']] \
-        #                 + [extra_obs['minerals']] + [extra_obs['gas']] \
-        #                 + [extra_obs['food_usage']] + [extra_obs['food_cap']]
-        #     print(infos)
+        if extra_obs is not None:
+
+            infos[:] = extra_obs['expansions'] + extra_obs['tech'] \
+                        + extra_obs['scout'] + [extra_obs['extractors']] \
+                        + [extra_obs['time']] + [extra_obs['drone']] \
+                        + [extra_obs['minerals']] + [extra_obs['gas']] \
+                        + [extra_obs['food_usage']] + [extra_obs['food_cap']]
+            print(infos)
 
             # ####
 
