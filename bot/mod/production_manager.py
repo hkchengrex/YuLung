@@ -171,7 +171,7 @@ class ProductionManager(LowLevelModule):
                                     self.update_ongoing_construction(units_tag_dict)
                                     return planned_action
                                 else:
-                                    print('Failed to build at ', str(build_pos))
+                                    # print('Failed to build at ', str(build_pos))
                                     # Just remove it from the queue
                                     # Since I changed an item in the for loop, better return
                                     self.units_pending.remove(pending)

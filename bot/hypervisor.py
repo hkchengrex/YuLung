@@ -49,6 +49,8 @@ class Hypervisor:
 
         self.mineral_worker_ratio = 0.5
 
+        self.last_reward = 0
+
     @staticmethod
     def get_macro_action_spec():
         return {'discrete': [
@@ -74,6 +76,24 @@ class Hypervisor:
             'food_usage': self.global_info.resources.food_used,
             'food_cap': self.global_info.resources.food_cap
         }
+
+    def get_reward(self, obs):
+        raw_score = obs.observation.score_cumulative.score
+        mineral_adv = sum(obs.observation.score_by_category.killed_minerals-obs.observation.score_by_category.lost_minerals)
+        gas_adv = sum(obs.observation.score_by_category.killed_vespene-obs.observation.score_by_category.lost_vespene)
+        total_val = obs.observation.score_cumulative.total_value_units
+
+        reward = raw_score/20 + mineral_adv + gas_adv*5 + total_val/5
+
+        reward = reward/200 ** ((self.global_iter+1000)/3000)
+
+        td = reward - self.last_reward
+        self.last_reward = reward
+
+        td = min(td, 0.5)
+        td = max(td, -0.5)
+
+        return td
 
     def process(self, macro_action, obs):
         units, units_tag_dict = self.global_info.update(obs)

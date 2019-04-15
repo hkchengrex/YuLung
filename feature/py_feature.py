@@ -48,7 +48,7 @@ class FeatureTransform:
         # (obs) Refer to __init__, input the some observations to NN ##
 
         screens = np.zeros(self.screen_shape, dtype=np.float)
-        infos = np.zeros(self.n_info, dtype=np.float)
+        infos = np.ones(self.n_info, dtype=np.float)
 
         screens[0] = obs.observation.feature_screen.height_map
         screens[1] = obs.observation.feature_screen.visibility_map
@@ -57,13 +57,14 @@ class FeatureTransform:
         screens[4] = obs.observation.feature_screen.unit_density_aa
         screens[5] = obs.observation.feature_screen.unit_hit_points
 
-        if extra_obs is not None:
-
-            infos[:] = extra_obs['expansions'] + extra_obs['tech'] \
-                        + extra_obs['scout'] + [extra_obs['extractors']] \
-                        + [extra_obs['time']] + [extra_obs['drone']] \
-                        + [extra_obs['minerals']] + [extra_obs['gas']] \
-                        + [extra_obs['food_usage']] + [extra_obs['food_cap']]
+        # if extra_obs is not None:
+        #
+        #     infos[:] = extra_obs['expansions'] + extra_obs['tech'] \
+        #                 + extra_obs['scout'] + [extra_obs['extractors']] \
+        #                 + [extra_obs['time']] + [extra_obs['drone']] \
+        #                 + [extra_obs['minerals']] + [extra_obs['gas']] \
+        #                 + [extra_obs['food_usage']] + [extra_obs['food_cap']]
+        #     print(infos)
 
             # ####
 

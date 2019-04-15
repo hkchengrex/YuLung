@@ -1,6 +1,7 @@
 .idea/
 venv/
 trained_models/
+log.txt
 
 *.pyc
 *_pb2.py
