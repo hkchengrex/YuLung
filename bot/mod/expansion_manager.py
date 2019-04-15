@@ -53,6 +53,9 @@ class ExpansionManager(LowLevelModule):
                 return e
         return None
 
+    def get_unbuilt_expansion_count(self):
+        return len([e for e in self.own_expansion() if e.base is None])
+
     def init_expansion(self, units: List[Unit]):
         """
         - Finds all expansion locations by clustering the resources fields once
@@ -91,6 +94,9 @@ class ExpansionManager(LowLevelModule):
                 self.expansion.append(Expansion(center_pos, minerals, gases, drones))
 
             self.logger.log_game_info('Found %d expansions' % len(self.expansion))
+
+            # Sort the expansions using distance to lower left corner
+            self.expansion = sorted(self.expansion, key=lambda x: x.pos.dist(point.Point(0, 0)))
 
             # Find our starting expansion using distance to hatchery
             hatcheries = get_all_owned(units, UNITS[UnitID.Hatchery])
@@ -149,7 +155,7 @@ class ExpansionManager(LowLevelModule):
             self.logger.log_game_info('Claimed expansion at %s ' % str(exp.pos))
             exp.ownership = Alliance.Self
 
-    def update_expansion(self, units: typing.List[Unit], units_tag_dict: typing.Dict[int, Unit]):
+    def update_expansion(self, units: typing.List[Unit], units_tag_dict: typing.Dict[int, Unit], produ_man: ProductionManager):
         """
         Enemy's expansion is defined to be an expansion with a nearby enemy building (unmovable things)
         Our expansion is what we claim it is. It does not matter whether we have structures around it.
@@ -180,11 +186,9 @@ class ExpansionManager(LowLevelModule):
             """
 
             if exp.ownership == Alliance.Self:
-                # Assume that our expansions are always ours. Bold claim though.
 
                 # Build hatchery if we haven't
-                if exp.base is None and not exp.base_queued:
-                    exp.base_queued = True
+                if exp.base is None and not produ_man.check_exist_in_queue(UNITS[UnitID.Hatchery]):
                     hatchery_build_pos.append(exp.pos)
                     self.logger.log_game_info("Wanted to build hatchery at %s" % str(exp.pos))
 
@@ -199,7 +203,6 @@ class ExpansionManager(LowLevelModule):
                 for b in our_bases:
                     if b.pos.dist(exp.pos) < BASE_TO_EXPANSION_THRESHOLD:
                         exp.base = b
-                        exp.base_queued = False
 
                 if exp.base is not None:
                     if exp.queen is not None:
@@ -297,15 +300,14 @@ class ExpansionManager(LowLevelModule):
 
         extractors = get_all_owned(units, UNITS[UnitID.Extractor])
 
-        gases = get_all(units, UNITS[UnitID.VespeneGeyser])
+        gases = get_all(units, GAS_UNIT_ID)
         gases = [g for g in gases if g.display_type == 1 and not g.has_ongoing_action]
+        # gases = [g for g in gases]
 
         empty_gases = [
             g for g in gases if
             not any([ex.pos.dist(g.pos) < 100 for ex in extractors])
         ]
-
-        print(empty_gases)
 
         for g in empty_gases:
             if g.pos.dist(self.main_expansion().pos) < BUILDING_TO_EXPANSION_THRESHOLD:

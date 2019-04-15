@@ -26,10 +26,10 @@ class Unit(RawUnit):
             return False
 
         return self.unit_type not in [
-            UNITS[UnitID.Drone],
-            UNITS[UnitID.Overlord],
-            UNITS[UnitID.Larva],
-        ] + ZERG_BUILDINGS_TYPE
+            UNITS[UnitID.Drone].unit_id,
+            UNITS[UnitID.Overlord].unit_id,
+            UNITS[UnitID.Larva].unit_id,
+        ] + [t.unit_id for t in ZERG_BUILDINGS_TYPE]
 
     def update(self, old_unit):
         """

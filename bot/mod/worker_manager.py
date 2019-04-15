@@ -84,26 +84,29 @@ class WorkerManager(LowLevelModule):
 
         extractors = [ext for ext in get_all_owned(units, UNITS[UnitID.Extractor]) if ext.build_progress == 100]
         ideal_num_on_gas = round(ratio * self.get_gas_slots(units))
-        #print("\nDrones on gas:", len(self.drones_on_gas), "Ideal:", ideal_num_on_gas, "\n")
+        # print("\nDrones on gas:", len(self.drones_on_gas), "Ideal:", ideal_num_on_gas, "\n")
 
-        #Assign Worker to Extractor
+        # Assign Worker to Extractor
         if len(extractors) > 0:
-            if len(self.drones_on_gas) < ideal_num_on_gas:                
+            if len(self.drones_on_gas) < ideal_num_on_gas:
+                selected_drone = None
                 for extract in extractors:
                     if extract.assigned_harvesters < extract.ideal_harvesters:
                         if len(untracked_drones) > 0:
                             selected_drone = random.choice(untracked_drones)
                             self.tracked_drones.append(selected_drone)
-                        #Use Mineral Drones
+                        # Use Mineral Drones
                         else:
                             for exp in expansions:
-                                if extract in exp.extractor:
-                                    selected_drone = random.choice(exp.drones)
-                                    exp.drones.remove(selected_drone)
-                                    break
-                        
-                        planned_action = FUNCTIONS.Harvest_Gather_raw_targeted("now", extract.tag, [selected_drone.tag])
-                        self.drones_on_gas.append(selected_drone)
+                                if len(exp.drones) > 0:
+                                    if extract in exp.extractor:
+                                        selected_drone = random.choice(exp.drones)
+                                        exp.drones.remove(selected_drone)
+                                        break
+
+                        if selected_drone is not None:
+                            planned_action = FUNCTIONS.Harvest_Gather_raw_targeted("now", extract.tag, [selected_drone.tag])
+                            self.drones_on_gas.append(selected_drone)
                         # print("\nDrone assigned to Extractor", extractors.index(extract), "\n")
                         
                         return planned_action
@@ -131,7 +134,7 @@ class WorkerManager(LowLevelModule):
                     if exp.get_assigned_harvesters() < exp.get_ideal_harvesters() or \
                        (exp.base.build_progress < 100 and len(exp.drones) < len(exp.minerals)*2):
                         base_pos = point.Point(exp.base.posx, exp.base.posy)
-                        minerals = get_all(units, UNITS[UnitID.MineralField])
+                        minerals = get_all(units, MINERAL_UNIT_ID)
                         closest_pos = point.Point(minerals[0].posx, minerals[0].posy)
                         closest_m = minerals[0]
                         for m in minerals:

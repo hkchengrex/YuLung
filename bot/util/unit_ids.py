@@ -134,6 +134,7 @@ TECH_BUILDING_TYPE = [
 
 ZERG_TECH_BUILDINGS = [
     UNITS[UnitID.SpawningPool],
+    UNITS[UnitID.EvolutionChamber],
     UNITS[UnitID.RoachWarren],
     UNITS[UnitID.BanelingNest],
     UNITS[UnitID.Lair],

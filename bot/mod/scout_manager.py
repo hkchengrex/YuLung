@@ -16,19 +16,19 @@ class ScoutManager(LowLevelModule):
     def __init__(self, global_info):
         super().__init__(global_info)
 
-        self.seen_types = set()
-        self.recorded_tech = set()
+        self._seen_types = set()
+        self._recorded_tech = set()
 
-        self.scout_targets = []
-        self.scout_routine = []
+        self._scout_targets = []
+        self._scout_routine = []
 
-        self.curr_target = None
+        self._curr_target = None
 
         self.enemy_tech = [False] * len(TECH_BUILDING_TYPE)
         self.enemy_strong_cloak = False
 
-        self.active_scout_tag = None  # type: int
-        self.do_scout = False
+        self._active_scout_tag = None  # type: Optional[int]
+        self._do_scout = False
 
         # Build DAG for tech requirement
         self.tech_DAG = {}
@@ -36,10 +36,10 @@ class ScoutManager(LowLevelModule):
             self.tech_DAG[u.unit_id] = u.tech_requirement
 
     def set_scout_tar(self, targets):
-        self.scout_targets = targets
+        self._scout_targets = targets
 
     def go_scout_once(self):
-        self.do_scout = True
+        self._do_scout = True
 
     def update(self, units: List[Unit], units_tag_dict: Dict[int, Unit]):
 
@@ -47,7 +47,7 @@ class ScoutManager(LowLevelModule):
 
         self.record_observation(units)
 
-        active_scout = units_tag_dict.get(self.active_scout_tag, None)
+        active_scout = units_tag_dict.get(self._active_scout_tag, None)
 
         # Pick a scout
         if active_scout is None:
@@ -58,39 +58,39 @@ class ScoutManager(LowLevelModule):
 
         # Send it to scout
         if active_scout is not None:
-            self.active_scout_tag = active_scout.tag
+            self._active_scout_tag = active_scout.tag
 
             # Send action once per target
             if not active_scout.has_ongoing_action:
-                if len(self.scout_routine) == 0:
-                    self.curr_target = self.global_info.home_pos
+                if len(self._scout_routine) == 0:
+                    self._curr_target = self.global_info.home_pos
                 else:
-                    self.curr_target = self.scout_routine[0]
-                    self.scout_routine = self.scout_routine[1:]
+                    self._curr_target = self._scout_routine[0]
+                    self._scout_routine = self._scout_routine[1:]
 
                 active_scout.has_ongoing_action = True
 
             # Change to next target when reached
-            if active_scout.pos.dist(self.curr_target) < 500:
+            if active_scout.pos.dist(self._curr_target) < 500:
                 # Reset target
-                if len(self.scout_routine) == 0 and self.do_scout:
-                    self.scout_routine = self.scout_targets
-                    self.do_scout = False
+                if len(self._scout_routine) == 0 and self._do_scout:
+                    self._scout_routine = self._scout_targets
+                    self._do_scout = False
                 active_scout.has_ongoing_action = False
 
             elif active_scout.order_len == 0:
-                planned_action = FUNCTIONS.Move_raw_pos("now", self.curr_target, [self.active_scout_tag])
+                planned_action = FUNCTIONS.Move_raw_pos("now", self._curr_target, [self._active_scout_tag])
 
         return planned_action
 
     def record_observation(self, units: List[Unit]):
         enemy_types = set([u.unit_type for u in units if u.alliance == Alliance.Enemy])
-        new_types = enemy_types - self.seen_types
+        new_types = enemy_types - self._seen_types
 
         if len(new_types) == 0:
             return
 
-        self.seen_types = self.seen_types.union(new_types)
+        self._seen_types = self._seen_types.union(new_types)
 
         while len(new_types) > 0:
             unit_type = new_types.pop()
@@ -107,10 +107,10 @@ class ScoutManager(LowLevelModule):
 
             # Resolve DAG
             parent = self.tech_DAG[unit_type]
-            if parent != 0 and parent not in self.seen_types:
+            if parent != 0 and parent not in self._seen_types:
                 self.logger.log_game_info('DAG resolved something new: %s' % rev_id2type(parent).name)
                 new_types.add(parent)
-                self.seen_types.add(parent)
+                self._seen_types.add(parent)
 
 
 

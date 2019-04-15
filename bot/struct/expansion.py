@@ -23,8 +23,7 @@ class Expansion:
         self.ownership = ownership
 
         self.extractor = []  # type: List[Unit]
-        self.base = None   # type: Unit # Unit referring to hatchery/lair/hive
-        self.base_queued = False
+        self.base = None   # type: Optional[Unit] # Unit referring to hatchery/lair/hive
         self.is_main = False
 
         self.queen = None
@@ -51,4 +50,3 @@ class Expansion:
 
     def reset(self):
         self.base = None
-        self.base_queued = False
