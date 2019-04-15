@@ -78,6 +78,11 @@ class YuLungEnv(gym.Env):
         self._num_step += 1
 
         self.agent.set_macro_action(macro_action)
+        # if macro_action[0][0] == 0:
+        #     reward = 1
+        # else:
+        #     reward = -1
+        # self.logger.log(logging.WARNING, macro_action[0][0])
 
         for _ in range(6):
             action = self.agent.step(self.obs)
