@@ -58,6 +58,8 @@ def main():
     torch.manual_seed(args.seed)
     torch.cuda.manual_seed_all(args.seed)
 
+    max_reward = -10000
+
     if args.cuda and torch.cuda.is_available() and args.cuda_deterministic:
         torch.backends.cudnn.benchmark = False
         torch.backends.cudnn.deterministic = True
@@ -302,10 +304,25 @@ def main():
                         np.max(episode_rewards), dist_entropy, value_loss,
                         action_loss))
 
-            logger.add_scalar('reward/mean_reward', np.mean(episode_rewards), j)
+            mean_reward = np.mean(episode_rewards)
+            logger.add_scalar('reward/mean_reward', mean_reward, j)
             logger.add_scalar('reward/median_reward', np.median(episode_rewards), j)
             logger.add_scalar('reward/min_reward', np.min(episode_rewards), j)
             logger.add_scalar('reward/max_reward', np.max(episode_rewards), j)
+
+            if mean_reward > max_reward:
+                save_path = os.path.join(args.save_dir, full_id + args.algo)
+                try:
+                    os.makedirs(save_path)
+                except OSError:
+                    pass
+
+                torch.save([
+                    actor_critic,
+                    getattr(utils.get_vec_normalize(envs), 'ob_rms', None)
+                ], os.path.join(save_path, args.env_name + '_best' + ".pt"))
+
+                max_reward = mean_reward
 
         if (args.eval_interval is not None and len(episode_rewards) > 1
                 and j % args.eval_interval == 0):
