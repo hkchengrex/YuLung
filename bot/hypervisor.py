@@ -80,12 +80,11 @@ class Hypervisor:
 
     def get_reward(self, obs):
         raw_score = obs.observation.score_cumulative.score
-        mineral_adv = sum(obs.observation.score_by_category.killed_minerals-obs.observation.score_by_category.lost_minerals)
-        gas_adv = sum(obs.observation.score_by_category.killed_vespene-obs.observation.score_by_category.lost_vespene)
+        mineral_adv = sum(obs.observation.score_by_category.killed_minerals)
+        gas_adv = sum(obs.observation.score_by_category.killed_vespene)
         total_val = obs.observation.score_cumulative.total_value_units
-        mineral_now = self.global_info.resources.mineral
 
-        reward = raw_score/20 + mineral_adv/5 + gas_adv/2 + total_val/5 + mineral_now/8
+        reward = raw_score/20 + mineral_adv/5 + gas_adv/2 + total_val/5
 
         reward = reward/200 ** ((self.global_iter+1000)/3000)
 
