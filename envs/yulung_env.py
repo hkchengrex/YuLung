@@ -207,15 +207,39 @@ class YuLungEnv(gym.Env):
         return self._epi_reward
 
 import datetime
+
+
 class YuLungSimple64Env(YuLungEnv):
     def __init__(self, **kwargs):
         super().__init__(
             map_name='Simple64',
-            visualize=True,
+            visualize=False,
             step_mul=8,
             save_replay_episodes=10,
             replay_dir=datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S"),
             replay_prefix='YuLung64',
+            agent_interface_format = sc2_env.parse_agent_interface_format(
+                feature_screen=84,
+                feature_minimap=25,
+                rgb_screen=None,
+                rgb_minimap=None,
+                action_space='FEATURES',
+                use_feature_units=False,
+                use_raw_units=True,
+                camera_width_world_units=142,
+            ),
+            **kwargs)
+
+
+class YuLungAbiogenesisEnv(YuLungEnv):
+    def __init__(self, **kwargs):
+        super().__init__(
+            map_name='Abiogenesis',
+            visualize=False,
+            step_mul=8,
+            save_replay_episodes=10,
+            replay_dir=datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S"),
+            replay_prefix='YuLungAbiogenesis',
             agent_interface_format = sc2_env.parse_agent_interface_format(
                 feature_screen=84,
                 feature_minimap=25,
