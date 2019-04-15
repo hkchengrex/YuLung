@@ -276,6 +276,10 @@ def main():
         logger.add_scalar('stat/action_loss', action_loss, j)
         logger.add_scalar('stat/entropy', dist_entropy, j)
 
+        print('Value   loss: ', value_loss)
+        print('Action  loss: ', action_loss)
+        print('Entropy loss: ', dist_entropy)
+
         rollouts.after_update()
 
         # save for every interval-th episode or for the last epoch
