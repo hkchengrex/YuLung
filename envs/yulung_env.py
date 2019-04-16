@@ -228,7 +228,7 @@ class YuLungSimple64Env(YuLungEnv):
     def __init__(self, **kwargs):
         super().__init__(
             map_name='Simple64',
-            visualize=True,
+            visualize=False,
             step_mul=8,
             save_replay_episodes=10,
             replay_dir=datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S"),
