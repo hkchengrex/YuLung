@@ -135,6 +135,10 @@ def main():
         info_discrete + info_scalar,
         # ####
         base_kwargs={'recurrent': args.recurrent_policy})
+
+    if args.load_model is not None:
+        actor_critic.load_state_dict(torch.load(args.load_model))
+
     actor_critic.to(device)
 
     if args.algo == 'a2c':
@@ -292,10 +296,13 @@ def main():
             except OSError:
                 pass
 
-            torch.save([
-                actor_critic,
-                getattr(utils.get_vec_normalize(envs), 'ob_rms', None)
-            ], os.path.join(save_path, args.env_name + '_%d' % j + ".pt"))
+            # torch.save([
+            #     actor_critic,
+            #     getattr(utils.get_vec_normalize(envs), 'ob_rms', None)
+            # ], os.path.join(save_path, args.env_name + '_%d' % j + ".pt"))
+
+            torch.save(
+                actor_critic.state_dict(), os.path.join(save_path, args.env_name + '_%d' % j + ".pt"))
 
         if j % args.log_interval == 0 and len(episode_rewards) > 1:
             total_num_steps = (j + 1) * args.num_processes * args.num_steps
@@ -322,10 +329,8 @@ def main():
                 except OSError:
                     pass
 
-                torch.save([
-                    actor_critic,
-                    getattr(utils.get_vec_normalize(envs), 'ob_rms', None)
-                ], os.path.join(save_path, args.env_name + '_best' + ".pt"))
+                torch.save(
+                    actor_critic.state_dict(), os.path.join(save_path, args.env_name + '_best' + ".pt"))
 
                 max_reward = mean_reward
 

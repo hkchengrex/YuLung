@@ -75,7 +75,8 @@ class ProductionManager(LowLevelModule):
 
             elif unit_type == UNITS[UnitID.Overseer]:
                 if self.global_info.check_if_unit_exist(UNITS[UnitID.Lair]):
-                    self._extend_queue(unit_type, None, amount, life=30)
+                    if len(get_all_owned(self.global_info.consistent_units.units, UNITS[UnitID.Overseer])) <= 2:
+                        self._extend_queue(unit_type, None, amount, life=30)
 
             else:
                 self._extend_queue(unit_type, None, amount, life=30)

@@ -84,45 +84,48 @@ class Hypervisor:
         }
 
     def get_reward(self, obs):
-        raw_score = obs.observation.score_cumulative.score
-        mineral_adv = sum(obs.observation.score_by_category.killed_minerals)
-        gas_adv = sum(obs.observation.score_by_category.killed_vespene)
-        total_val = obs.observation.score_cumulative.total_value_units
-        curr_min = self.global_info.resources.mineral
+        # raw_score = obs.observation.score_cumulative.score
+        # mineral_adv = sum(obs.observation.score_by_category.killed_minerals)
+        # gas_adv = sum(obs.observation.score_by_category.killed_vespene)
+        # total_val = obs.observation.score_cumulative.total_value_units
+        # curr_min = self.global_info.resources.mineral
+        #
+        # raw_score /= 20
+        # mineral_adv /= 5
+        # gas_adv /= 2
+        # total_val /= 5
+        # curr_min /= 35
+        #
+        # reward = raw_score + mineral_adv + gas_adv + total_val - curr_min
+        #
+        # reward = reward/200 ** ((self.global_iter+1000)/3000)
+        #
+        # if self.last_reward is None:
+        #     self.last_reward = reward
+        # else:
+        #     # print('Raw  TD: ', raw_score - self.last_raw)
+        #     # print('Madv TD:', mineral_adv)
+        #     # print('Gadv TD:', gas_adv)
+        #     # print('Tval TD:', total_val - self.last_total_val)
+        #     # print('Tval   :', total_val)
+        #     # print('Min    :', curr_min)
+        #     # print('Total  :',  reward)
+        #     pass
+        #
+        # td = reward - self.last_reward
+        #
+        # self.last_reward = reward
+        # self.last_raw = raw_score
+        # self.last_mineral_adv = mineral_adv
+        # self.last_gas_adv = gas_adv
+        # self.last_total_val = total_val
+        #
+        # td = min(td, 0.5)
+        # td = max(td, -0.5)
 
-        raw_score /= 20
-        mineral_adv /= 5
-        gas_adv /= 2
-        total_val /= 5
-        curr_min /= 35
+        # return td
 
-        reward = raw_score + mineral_adv + gas_adv + total_val - curr_min
-
-        reward = reward/200 ** ((self.global_iter+1000)/3000)
-
-        if self.last_reward is None:
-            self.last_reward = reward
-        else:
-            # print('Raw  TD: ', raw_score - self.last_raw)
-            # print('Madv TD:', mineral_adv)
-            # print('Gadv TD:', gas_adv)
-            # print('Tval TD:', total_val - self.last_total_val)
-            # print('Min    :', curr_min)
-            # print('Total  :',  reward)
-            pass
-
-        td = reward - self.last_reward
-
-        self.last_reward = reward
-        self.last_raw = raw_score
-        self.last_mineral_adv = mineral_adv
-        self.last_gas_adv = gas_adv
-        self.last_total_val = total_val
-
-        td = min(td, 0.5)
-        td = max(td, -0.5)
-
-        return td
+        return -0.003
 
     def process(self, macro_action, obs):
         units, units_tag_dict = self.global_info.update(obs)
