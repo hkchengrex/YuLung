@@ -84,7 +84,7 @@ class YuLungEnv(gym.Env):
         #     reward = -1
         # self.logger.log(logging.WARNING, macro_action[0][0])
 
-        for _ in range(6):
+        for _ in range(3):
             action = self.agent.step(self.obs)
             self.obs = self._env.step([action])[0]
             self.agent.set_macro_action(None)
@@ -228,7 +228,7 @@ class YuLungSimple64Env(YuLungEnv):
     def __init__(self, **kwargs):
         super().__init__(
             map_name='Simple64',
-            visualize=False,
+            visualize=True,
             step_mul=8,
             save_replay_episodes=10,
             replay_dir=datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S"),
@@ -241,7 +241,7 @@ class YuLungSimple64Env(YuLungEnv):
                 action_space='FEATURES',
                 use_feature_units=False,
                 use_raw_units=True,
-                camera_width_world_units=142,
+                camera_width_world_units=75,
             ),
             **kwargs)
 

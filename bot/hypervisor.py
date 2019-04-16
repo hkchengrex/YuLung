@@ -51,6 +51,11 @@ class Hypervisor:
 
         self.last_reward = None
 
+        self.last_raw = None
+        self.last_mineral_adv = None
+        self.last_gas_adv = None
+        self.last_total_val = None
+
     @staticmethod
     def get_macro_action_spec():
         return {'discrete': [
@@ -83,16 +88,36 @@ class Hypervisor:
         mineral_adv = sum(obs.observation.score_by_category.killed_minerals)
         gas_adv = sum(obs.observation.score_by_category.killed_vespene)
         total_val = obs.observation.score_cumulative.total_value_units
+        curr_min = self.global_info.resources.mineral
 
-        reward = raw_score/20 + mineral_adv/5 + gas_adv/2 + total_val/5
+        raw_score /= 20
+        mineral_adv /= 5
+        gas_adv /= 2
+        total_val /= 5
+        curr_min /= 35
+
+        reward = raw_score + mineral_adv + gas_adv + total_val - curr_min
 
         reward = reward/200 ** ((self.global_iter+1000)/3000)
 
         if self.last_reward is None:
             self.last_reward = reward
+        else:
+            # print('Raw  TD: ', raw_score - self.last_raw)
+            # print('Madv TD:', mineral_adv)
+            # print('Gadv TD:', gas_adv)
+            # print('Tval TD:', total_val - self.last_total_val)
+            # print('Min    :', curr_min)
+            # print('Total  :',  reward)
+            pass
 
         td = reward - self.last_reward
+
         self.last_reward = reward
+        self.last_raw = raw_score
+        self.last_mineral_adv = mineral_adv
+        self.last_gas_adv = gas_adv
+        self.last_total_val = total_val
 
         td = min(td, 0.5)
         td = max(td, -0.5)
@@ -164,6 +189,12 @@ class Hypervisor:
         """
         Routine update within hypervisor and low-level modules
         """
+
+        if self.global_info.resources.mineral > 500:
+            self.produ_man.build_units_with_checking(UNITS[UnitID.Zergling])
+            self.produ_man.build_units_with_checking(UNITS[UnitID.Roach])
+            self.produ_man.build_units_with_checking(UNITS[UnitID.Hydralisk])
+            self.produ_man.build_units_with_checking(UNITS[UnitID.Mutalisk])
 
         # Hatchery / queen build request from expansion manager, just do it
         for pos in hatchery_build_pos:
