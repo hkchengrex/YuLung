@@ -125,7 +125,7 @@ class Hypervisor:
 
         # return td
 
-        return -0.003
+        return 0
 
     def process(self, macro_action, obs):
         units, units_tag_dict = self.global_info.update(obs)
