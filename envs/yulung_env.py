@@ -84,7 +84,7 @@ class YuLungEnv(gym.Env):
         #     reward = -1
         # self.logger.log(logging.WARNING, macro_action[0][0])
 
-        for _ in range(3):
+        for _ in range(6):
             action = self.agent.step(self.obs)
             self.obs = self._env.step([action])[0]
             self.agent.set_macro_action(None)
