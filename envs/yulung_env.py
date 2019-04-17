@@ -134,7 +134,7 @@ class YuLungEnv(gym.Env):
         players = [
             # self.get_agent(),
             sc2_env.Agent(race=sc2_env.Race.zerg, name='YuLungAgent'),
-            sc2_env.Bot(race=sc2_env.Race.random, difficulty=sc2_env.Difficulty.medium)
+            sc2_env.Bot(race=sc2_env.Race.random, difficulty=sc2_env.Difficulty.easy)
         ]
 
         self._env = sc2_env.SC2Env(players=players, **args)
