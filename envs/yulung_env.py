@@ -230,7 +230,7 @@ class YuLungSimple64Env(YuLungEnv):
             map_name='Simple64',
             visualize=False,
             step_mul=8,
-            save_replay_episodes=10,
+            save_replay_episodes=2,
             replay_dir=datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S"),
             replay_prefix='YuLung64',
             agent_interface_format = sc2_env.parse_agent_interface_format(
@@ -252,7 +252,7 @@ class YuLungAbiogenesisEnv(YuLungEnv):
             map_name='Abiogenesis',
             visualize=False,
             step_mul=8,
-            save_replay_episodes=10,
+            save_replay_episodes=2,
             replay_dir=datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S"),
             replay_prefix='YuLungAbiogenesis',
             agent_interface_format = sc2_env.parse_agent_interface_format(
