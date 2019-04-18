@@ -146,10 +146,10 @@ class ExpansionManager(LowLevelModule):
         # Instant claim, yeah
         exp = self.expansion[idx]
         if exp.ownership == Alliance.Enemy:
-            self.logger.log_game_info('Attempt to claim an enemy expansion at %s' % str(exp.pos))
+            # self.logger.log_game_info('Attempt to claim an enemy expansion at %s' % str(exp.pos))
             pass
         elif exp.ownership == Alliance.Self:
-            self.logger.log_game_info('Attempt to an claimed expansion at %s' % str(exp.pos))
+            # self.logger.log_game_info('Attempt to an claimed expansion at %s' % str(exp.pos))
             pass
         else:
             self.logger.log_game_info('Claimed expansion at %s ' % str(exp.pos))

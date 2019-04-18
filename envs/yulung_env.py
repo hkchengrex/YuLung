@@ -134,7 +134,7 @@ class YuLungEnv(gym.Env):
         players = [
             # self.get_agent(),
             sc2_env.Agent(race=sc2_env.Race.zerg, name='YuLungAgent'),
-            sc2_env.Bot(race=sc2_env.Race.random, difficulty=sc2_env.Difficulty.hard)
+            sc2_env.Bot(race=sc2_env.Race.random, difficulty=sc2_env.Difficulty.easy)
         ]
 
         self._env = sc2_env.SC2Env(players=players, **args)
@@ -230,7 +230,7 @@ class YuLungSimple64Env(YuLungEnv):
             map_name='Simple64',
             visualize=False,
             step_mul=8,
-            save_replay_episodes=10,
+            save_replay_episodes=2,
             replay_dir=datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S"),
             replay_prefix='YuLung64',
             agent_interface_format = sc2_env.parse_agent_interface_format(
@@ -241,7 +241,7 @@ class YuLungSimple64Env(YuLungEnv):
                 action_space='FEATURES',
                 use_feature_units=False,
                 use_raw_units=True,
-                camera_width_world_units=142,
+                camera_width_world_units=75,
             ),
             **kwargs)
 
@@ -252,7 +252,7 @@ class YuLungAbiogenesisEnv(YuLungEnv):
             map_name='Abiogenesis',
             visualize=False,
             step_mul=8,
-            save_replay_episodes=10,
+            save_replay_episodes=2,
             replay_dir=datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S"),
             replay_prefix='YuLungAbiogenesis',
             agent_interface_format = sc2_env.parse_agent_interface_format(
